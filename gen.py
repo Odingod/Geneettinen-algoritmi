@@ -347,17 +347,26 @@ class World(object):
         for food in self.foods.values():
             self.removeFood(food)
         
-    def populate(self,generation=None):
+    def populate(self,generation=None, food_location='random'):
         if generation!= None:
             for cre in generation.creatures:
                 self.addCreature(cre)
         else:
             for x in range(10):
                 self.addCreature(Creature((randint(0,WIDTH),randint(0,HEIGHT)),NORTH) if not USE_GRAPHICS else CreatureLabel(self,(randint(0,WIDTH),randint(0,HEIGHT))))
-        for x in range(200):
-            self.addFood(Food((randint(0,WIDTH),randint(0,HEIGHT))) if not USE_GRAPHICS else FoodLabel(self,(randint(0,WIDTH),randint(0,HEIGHT))))
         
-      
+        if food_location=='random':
+            for x in range(200):
+                self.addFood(Food((randint(0,WIDTH),randint(0,HEIGHT))) if not USE_GRAPHICS else FoodLabel(self,(randint(0,WIDTH),randint(0,HEIGHT))))
+        elif food_location=='middle':
+            for i in range(15, 26):
+                for j in range(15, 26):
+                    self.addFood((Food(i, j) if not USE_GRAPHICS else FoodLabel(self, (i,j))))      
+        elif food_location=='corner':
+            for i in range(WIDTH):
+                for j in range(HEIGHT):
+                    if (i<5 or i>WIDTH-6) and (j<5 or j>HEIGHT-6):
+                        self.addFood((Food(i, j) if not USE_GRAPHICS else FoodLabel(self, (i,j))))  
 
     
 
