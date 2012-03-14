@@ -70,6 +70,7 @@ global USE_GRAPHICS
 USE_GRAPHICS=True
 CREATURE_PIC=[QImage('jpac.png').transformed(QTransform().rotate(a)) for a in xrange(0,360,90)]
 FOOD_PIC=QImage('food16.png')
+CORPSE_PIC=QImage('pacdead.png')
 MUTATE=10 #chance of mutation in ‰
 
 class Creature(object):
@@ -94,6 +95,14 @@ class Creature(object):
         else:self.genome=genome
             
         self.eaten=1
+        self.calories = 500
+        self.dead = False
+        
+    def isDead(self):
+        return self.dead
+    
+    def changePic(self):
+        return
     
     def moveSelf(self):
         '''
@@ -106,10 +115,14 @@ class Creature(object):
             
         newloc=self.nextLoc()
         if world.getCreature(newloc)==None:
+            self.calories -= 10
+            if self.calories < 0:
+                self.dead = True
             world.updateLocation(self, newloc)
         if world.getFood(newloc)!=None:
             world.removeFood(world.getFood(newloc))
             self.eaten += 1
+            self.calories += 50
             
     def nextLoc(self):
         '''
@@ -131,8 +144,9 @@ class Creature(object):
         
         First updates the sight and then does the action defined by the genome
         '''
-        self.updateSelf()
-        self.doAction()
+        if not self.isDead():
+            self.updateSelf()
+            self.doAction()
     
     def updateSelf(self):
         '''
@@ -220,6 +234,12 @@ class CreatureLabel(QLabel,Creature):
         elif heading== WEST: a=2
         self.setPixmap(QPixmap.fromImage(CREATURE_PIC[a]))
 
+    def changePic(self):
+        '''
+        pic changes to corpse if creature dies
+        '''
+        super(CreatureLabel,self).changePic()
+        self.setPixmap(QPixmap.fromImage(CORPSE_PIC))
         
 class Generation(object):
     '''
@@ -345,6 +365,8 @@ class World(object):
         del self.creatures[creature.loc]
         self.creatures[newloc]=creature
         creature.loc=newloc
+        if creature.isDead():
+            creature.changePic()
         
     def getCreature(self,loc):
         try:
