@@ -88,6 +88,7 @@ class Creature(object):
         self.heading=heading
         self.sight=0
         self.memory=0
+        self.walked = 0
         if genome == None:
             self.genome=[[(randint(0,2),randint(0,15)) for y in xrange(4)] for x in xrange(16)]
         else:self.genome=genome
@@ -100,6 +101,9 @@ class Creature(object):
         
         Also eats food  if there is some on the new square
         '''
+        if self.loc != self.nextLoc():
+            self.walked+=1
+            
         newloc=self.nextLoc()
         if world.getCreature(newloc)==None:
             world.updateLocation(self, newloc)
@@ -254,6 +258,16 @@ class Generation(object):
             i+=cre.eaten-1
         return i
     
+    def totalWalked(self):
+        '''
+        Return how much the entire generation has walked
+        '''
+    
+        i = 0
+        for cre in self.creatures:
+            i+=cre.walked
+        return i    
+    
 
         
         
@@ -279,11 +293,12 @@ class FoodLabel(QLabel,Food):
         self.originalPic=QPixmap.fromImage(FOOD_PIC)
         self.setPixmap(self.originalPic)
         self.setAttribute(Qt.WA_DeleteOnClose)
-    
+
     def animate(self):
         self.setPixmap(self.originalPic.transformed(QTransform().rotate([-45,0,45,0][self.animationStep])))
         self.animationStep=(self.animationStep+1)%4  
-        
+    
+    
         
 class World(object):
     '''
@@ -292,6 +307,8 @@ class World(object):
     def __init__(self):
         self.creatures={}
         self.foods={}
+        self.statistics = []
+   
         
     def addCreature(self,creature):
         '''
@@ -357,8 +374,11 @@ class World(object):
         for x in range(200):
             self.addFood(Food((randint(0,WIDTH),randint(0,HEIGHT))) if not USE_GRAPHICS else FoodLabel(self,(randint(0,WIDTH),randint(0,HEIGHT))))
         
-      
 
+class Statistics():
+    def __init__(self, totaleaten, totalwalked):
+        self.totaleaten = totaleaten
+        self.totalwalked = totalwalked
     
 
                 
@@ -369,6 +389,8 @@ class WorldLabel(QWidget,World):
         self.setLayout(None)
         self.resize(GRIDSIZE*WIDTH,GRIDSIZE*HEIGHT)
         self.bool=False
+        
+   
     
     def sizeHint(self, *args, **kwargs):
         return QSize(GRIDSIZE*(WIDTH+1),GRIDSIZE*(HEIGHT+1))
@@ -427,6 +449,11 @@ class MainWindow(QMainWindow):
         self.editMenu.addSeparator()
         self.settings=self.editMenu.addAction('Settings')
         
+        self.statisticMenu = self.menuBar().addMenu('&Statistics')
+        self.showstatistics = self.statisticMenu.addAction('Show statistics')
+        
+        self.showstatistics.triggered.connect(self.showstatisticsA)
+        
         self.fastest.triggered.connect(self.fastestA)
         self.fast.triggered.connect(self.fastA)
         self.normal.triggered.connect(self.normalA)
@@ -448,7 +475,113 @@ class MainWindow(QMainWindow):
         self.timer=QTimer(self)
         self.timer.timeout.connect(self.doTurn)
         self.timer.start(1)
+        self.AddFoodAct = QAction("&Add food", self,
+
+                statusTip="Add food to location",
+
+                triggered = self.AddFood)
+        self.whatsHereAct = QAction("&Whats Here?", self, statusTip="Click to see whats under cursor!", triggered= self.whatsHere)
+    def showstatisticsA(self, Statistics = None):
+        QMessageBox.information(self, "Statistics",
+
+                self.getStatisticString()
+                , QMessageBox.Ok)
+    def getStatisticString(self):
+        string=""
+        i=1
+        for stat in world.statistics:
+            string+="year: "+ str(i)+"\n"
+            string+="Total eaten : "+ str(stat.totaleaten)+"\n" 
+            string+="Total walked :"+str(stat.totalwalked)
+            string+="\n"
+            string+="\n"
+            i+=1
+        return string
+    def contextMenuEvent(self, event):
+        
+        menu = QMenu(self) 
+        
+        self.SlowAct = QAction("&Slow", self,
+
+                statusTip="Set mode for Slow",
+
+                triggered=self.slowA)
+        
+        
+        self.NormalAct = QAction("&Normal", self,
+
+                statusTip="Set mode for Normal",
+
+                triggered=self.normalA)
+        
+        self.FastAct = QAction("&Fast", self,
+
+                statusTip="Set mode for Fast",
+
+                triggered=self.fastA)
+        
+        
+        self.SlowAct = QAction("&Slow", self,
+
+                statusTip="Set mode for Fastest",
+
+                triggered=self.slowA)
+        
+        
+        self.FastestAct = QAction("&Fastest", self,
+
+                statusTip="Set mode for Fast",
+
+                triggered=self.fastestA)
+           
     
+        
+        
+       
+        
+        SpeedMenu = menu.addMenu("&Mode")
+        
+        SpeedMenu.addAction(self.SlowAct)
+        
+        SpeedMenu.addAction(self.NormalAct)
+        
+        SpeedMenu.addAction(self.FastAct)
+        
+        SpeedMenu.addAction(self.FastestAct)
+        menu.addAction(self.AddFoodAct)
+        menu.addAction(self.whatsHereAct)
+        
+        
+        menu.exec_(event.globalPos())
+    def AddFood(self):
+        
+        #Toi sijainnin haku kusee viel vahasen.
+        pos = QCursor.pos()
+        pos =self.mapFromGlobal(pos)
+        loc = pos.toTuple()
+        
+        h = self.size().height()
+        w = self.size().width()
+        location = int(loc[0]*HEIGHT/h) - 3, int(loc[1]*WIDTH/w - 3)
+        world.addFood(Food(location) if not USE_GRAPHICS else FoodLabel(self,location))
+        print "food added"
+        
+    def whatsHere(self):
+        pos = QCursor.pos()
+        pos =self.mapFromGlobal(pos)
+        loc = pos.toTuple()
+        
+        h = self.size().height()
+        w = self.size().width()
+        location = int(loc[0]*HEIGHT/h) - 3, int(loc[1]*WIDTH/w - 3)
+        
+        if world.getFood(location):
+            print "food"
+        elif world.getCreature(location):
+            print "creature"
+        print location
+        
+
     def closeA(self):
         self.running=False
         print self.running  
@@ -510,12 +643,17 @@ class MainWindow(QMainWindow):
             self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2}'.format(self.year,self.day,self.highscore))
             self.day+=1
         else:
+            stat = Statistics(self.gen.totalEaten(), self.gen.totalWalked())
+            
+            world.statistics.append(stat)
             self.highscore=self.gen.totalEaten()
             self.gen=self.gen.nextGeneration()
             self.world.removeEverything()
             self.world.populate(self.gen)
             self.year+=1
             self.day=1
+    
+            
     
                
 if __name__ == '__main__':
