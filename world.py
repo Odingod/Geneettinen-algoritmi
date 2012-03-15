@@ -2,10 +2,7 @@
 from creature import *#Creature, CreatureLabel, Generation
 from food import Food, FoodLabel
 
-WIDTH=40
-HEIGHT=40
-GRIDSIZE=16
-USE_GRAPHICS=True
+from globals import *
 
 class World(object):
     '''

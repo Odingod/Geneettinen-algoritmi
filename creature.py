@@ -5,22 +5,24 @@ from PySide.QtGui import *
 from random import randint
 from random import choice
 
+
 #from world import *
 #from gen import *
 #from world import *
+from globals import *
 import gen
 
-NORTH=(0,-1)
-EAST=(1,0)
-SOUTH=(0,1)
-WEST=(-1,0)
-CREATURE_PIC=[QImage('jpac.png').transformed(QTransform().rotate(a)) for a in xrange(0,360,90)]
-CORPSE_PIC=QImage('pacdead.png')
-WIDTH=40
-HEIGHT=40
-GRIDSIZE=16
-USE_GRAPHICS = True
-MUTATE=10 #chance of mutation in ‰
+# NORTH=(0,-1)
+# EAST=(1,0)
+# SOUTH=(0,1)
+# WEST=(-1,0)
+# CREATURE_PIC=[QImage('jpac.png').transformed(QTransform().rotate(a)) for a in xrange(0,360,90)]
+# CORPSE_PIC=QImage('pacdead.png')
+# WIDTH=40
+# HEIGHT=40
+# GRIDSIZE=16
+# USE_GRAPHICS = True
+# MUTATE=10 #chance of mutation in ‰
 
 
 class WorldRetriever(object):

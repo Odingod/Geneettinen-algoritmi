@@ -6,10 +6,11 @@ from random import randint
 from random import choice
 
 from gen import *
+from globals import *
 #from world import *
 
-GRIDSIZE=16
-FOOD_PIC=QImage('food16.png')
+# GRIDSIZE=16
+# FOOD_PIC=QImage('food16.png')
 
 class Food(object):
     '''
