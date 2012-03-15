@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-from gen import *
+from creature import *#Creature, CreatureLabel, Generation
+from food import Food, FoodLabel
+
+WIDTH=40
+HEIGHT=40
+GRIDSIZE=16
+USE_GRAPHICS=True
 
 class World(object):
     '''
