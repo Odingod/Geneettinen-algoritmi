@@ -9,6 +9,9 @@ class World(object):
         self.creatures={}
         self.foods={}
         self.statistics = []
+        self.maximum=0
+        self.total=0
+        self.average=0.0
    
         
     def addCreature(self,creature):

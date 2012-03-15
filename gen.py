@@ -58,6 +58,7 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 from random import randint
 from random import choice
+import csv
 
 #from creature import *
 from world import *
@@ -355,8 +356,10 @@ class MainWindow(QMainWindow):
         
         self.statisticMenu = self.menuBar().addMenu('&Statistics')
         self.showstatistics = self.statisticMenu.addAction('Show statistics')
+        self.exportstatistics = self.statisticMenu.addAction('Export statistics')
         
         self.showstatistics.triggered.connect(self.showstatisticsA)
+        self.exportstatistics.triggered.connect(self.exportA)
         
         self.fastest.triggered.connect(self.fastestA)
         self.fast.triggered.connect(self.fastA)
@@ -379,17 +382,20 @@ class MainWindow(QMainWindow):
         self.timer=QTimer(self)
         self.timer.timeout.connect(self.doTurn)
         self.timer.start(1)
-        self.AddFoodAct = QAction("&Add food", self,
-
-                statusTip="Add food to location",
-
-                triggered = self.AddFood)
+        self.AddFoodAct = QAction("&Add food", self,statusTip="Add food to location",triggered = self.AddFood)
         self.whatsHereAct = QAction("&Whats Here?", self, statusTip="Click to see whats under cursor!", triggered= self.whatsHere)
     def showstatisticsA(self, Statistics = None):
-        QMessageBox.information(self, "Statistics",
-
-                self.getStatisticString()
-                , QMessageBox.Ok)
+        QMessageBox.information(self, "Statistics",self.getStatisticString(), QMessageBox.Ok)
+        
+    def exportA(self,statistics=None):
+        filename = QFileDialog.getSaveFileName(self,"Save as .csv", filter=("CSV (*.csv)"))
+        if filename[0]:
+            with open(filename[0],'wb') as f:
+                w=csv.writer(f,delimiter=';',quoting = csv.QUOTE_NONE)
+                w.writerow(["Total Eaten:","Total Walked:"])
+                for stat in world.statistics:
+                    w.writerow([stat.totaleaten,stat.totalwalked])
+		    
     def getStatisticString(self):
         string=""
         i=1
@@ -544,11 +550,14 @@ class MainWindow(QMainWindow):
                 #food.animate()
             if USE_GRAPHICS:
                 world.update()
-            self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2}'.format(self.year,self.day,self.highscore))
+                self.status.setText('Year: {0:}		Day: {1:03d}  Total eaten: {2}  Maximum: {3:03d} Average: {4:03d}'.format(self.year,self.day,self.highscore,world.maximum,int(world.average)))
             self.day+=1
         else:
             stat = Statistics(self.gen.totalEaten(), self.gen.totalWalked())
-            
+            world.total+=self.gen.totalEaten()
+            if self.gen.totalEaten()>world.maximum: 
+            	world.maximum=self.gen.totalEaten()
+            world.average=world.total/self.year
             world.statistics.append(stat)
             self.highscore=self.gen.totalEaten()
             self.gen=self.gen.nextGeneration()
