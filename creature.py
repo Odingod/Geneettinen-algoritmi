@@ -18,6 +18,20 @@ class WorldRetriever(object):
         global world
         world = self.world
 
+choices = {
+    'LEFT': 0,
+    'RIGHT': 1,
+    'AROUND': 2,
+    'MOVE': 3
+}
+
+sights = {
+    'NOTHING': 0,
+    'CREATURE': 1,
+    'VEGETABLE': 2,
+    'WALL': 3
+}
+
 class Creature(object):
     '''
     Basic creature
@@ -37,7 +51,7 @@ class Creature(object):
         self.walked = 0
 
         if genome is None:
-            self.genome = [[(randint(0, 2), randint(0, 15)) for y in xrange(4)] for x in xrange(16)]
+            self.genome = [[(randint(0, len(choices)), randint(0, 15)) for y in xrange(4)] for x in xrange(16)]
         else: self.genome = genome
             
         self.eaten = 1
@@ -53,8 +67,7 @@ class Creature(object):
     
     def moveSelf(self):
         '''
-        Moves self to the next location if it doesn't already contain a creature
-        
+        Moves self to the next location if it doesn't already contain a creature        
         Also eats food  if there is some on the new square
         '''
 
@@ -63,7 +76,6 @@ class Creature(object):
         if self.loc != newloc:
             self.walked += 1
    
-
         if world.getCreature(newloc) is None:
             self.calories -= 10
 
@@ -110,16 +122,13 @@ class Creature(object):
         nextLocation = self.nextLoc()
 
         if world.getCreature(nextLocation) is not None and world.getCreature(nextLocation) is not self: 
-            #saw someone else
-            self.sight = 1
+            self.sight = sights['CREATURE']
 
         elif world.getFood(nextLocation) is not None:
-            #saw food
-            self.sight = 2
+            self.sight = sights['VEGETABLE']
         elif nextLocation == self.loc:
-            #saw wall
-            self.sight = 3
-        else: self.sight = 0 #saw nothing
+            self.sight = sights['WALL']
+        else: self.sight = sights['NOTHING']
     
     def turnLeft(self):
         if self.heading == NORTH: self.turnSelf(WEST)
@@ -132,6 +141,13 @@ class Creature(object):
         elif self.heading == WEST: self.turnSelf(NORTH)
         elif self.heading == SOUTH: self.turnSelf(WEST)
         elif self.heading == EAST: self.turnSelf(SOUTH)
+
+    def turnAround(self):
+        if self.heading == NORTH: self.turnSelf(SOUTH)
+        elif self.heading == WEST: self.turnSelf(EAST)
+        elif self.heading == SOUTH: self.turnSelf(NORTH)
+        elif self.heading == EAST: self.turnSelf(WEST)
+
         
     def doAction(self):
         '''
@@ -139,9 +155,10 @@ class Creature(object):
         '''
         #if self.sight!=0:  print self.memory,self.sight
         a, b = self.genome[self.memory][self.sight]
-        if a == 0: self.turnLeft()
-        elif a == 1: self.turnRight()
-        elif a == 2: self.moveSelf()
+        if a == choices['LEFT']: self.turnLeft()
+        elif a == choices['RIGHT']: self.turnRight()
+        elif a == choices['AROUND']: self.turnAround()
+        elif a == choices['MOVE']: self.moveSelf()
 
         self.memory = b
         
@@ -224,10 +241,9 @@ class Generation(object):
                     self.creatures.append(CreatureLabel(world, (randint(0, WIDTH), randint(0, HEIGHT))))
 
                 else: 
-                    self.creatures.append(Creature((randint(0, WIDTH),randint(0, HEIGHT)), NORTH))
+                    self.creatures.append(Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH))
 
         else: self.creatures = creatures
-
 
 
     def nextGeneration(self):
