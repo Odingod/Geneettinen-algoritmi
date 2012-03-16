@@ -64,39 +64,39 @@ from food import *
 from globals import *
 #import creature
 
-import sys,time
+import sys, time
 
 class MainWindow(QMainWindow):   
     def __init__(self):
-        self.running=True
-        self.highscore=0
+        self.running = True
+        self.highscore = 0
         QMainWindow.__init__(self)     
         
-        self.menubar=QMenuBar(self)
+        self.menubar = QMenuBar(self)
         self.setMenuBar(self.menubar)
         
-        self.statusbar=QStatusBar(self)
+        self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
-        self.status=QLabel('DAYS')
+        self.status = QLabel('DAYS')
         self.statusbar.addWidget(self.status)
         
-        self.fileMenu=self.menuBar().addMenu('&File')
-        self.load=self.fileMenu.addAction('Load')
-        self.save=self.fileMenu.addAction('Save')
+        self.fileMenu = self.menuBar().addMenu('&File')
+        self.load = self.fileMenu.addAction('Load')
+        self.save = self.fileMenu.addAction('Save')
         self.fileMenu.addSeparator()
-        self.quit=self.fileMenu.addAction('Quit')
+        self.quit = self.fileMenu.addAction('Quit')
         
         self.quit.triggered.connect(app.quit)
         self.load.triggered.connect(self.loadA)
         self.save.triggered.connect(self.saveA)
         
-        self.editMenu=self.menuBar().addMenu('&Edit')
-        self.fastest=self.editMenu.addAction('Fastest')
-        self.fast=self.editMenu.addAction('Fast')
-        self.normal=self.editMenu.addAction('Normal')
-        self.slow=self.editMenu.addAction('Slow')
+        self.editMenu = self.menuBar().addMenu('&Edit')
+        self.fastest = self.editMenu.addAction('Fastest')
+        self.fast = self.editMenu.addAction('Fast')
+        self.normal = self.editMenu.addAction('Normal')
+        self.slow = self.editMenu.addAction('Slow')
         self.editMenu.addSeparator()
-        self.settings=self.editMenu.addAction('Settings')
+        self.settings = self.editMenu.addAction('Settings')
         
         self.statisticMenu = self.menuBar().addMenu('&Statistics')
         self.showstatistics = self.statisticMenu.addAction('Show statistics')
@@ -113,18 +113,18 @@ class MainWindow(QMainWindow):
         
         
         
-        self.world=WorldLabel() if USE_GRAPHICS else World()
+        self.world = WorldLabel() if USE_GRAPHICS else World()
         if USE_GRAPHICS:
             self.setCentralWidget(self.world)
         self.adjustSize()        
         global world
-        world=self.world
+        world = self.world
         self.genret = WorldRetriever(world)
-        self.gen=Generation(10)
+        self.gen = Generation(10)
         self.world.populate(self.gen)
-        self.year=1
-        self.day=1
-        self.timer=QTimer(self)
+        self.year = 1
+        self.day = 1
+        self.timer = QTimer(self)
         self.timer.timeout.connect(self.doTurn)
         self.timer.start(1)
         self.AddFoodAct = QAction("&Add food",self,
@@ -135,31 +135,31 @@ class MainWindow(QMainWindow):
                 statusTip="Click to see whats under cursor!", 
                 triggered= self.whatsHere)
                 
-    def showstatisticsA(self, Statistics = None):
+    def showstatisticsA(self, Statistics=None):
         QMessageBox.information(self,"Statistics",
                                 self.getStatisticString(),
                                 QMessageBox.Ok)
         
     def exportA(self,statistics=None):
-        filename = QFileDialog.getSaveFileName(self,"Save as .csv",
-                                               filter=("CSV (*.csv)"))
+        filename = QFileDialog.getSaveFileName(self, "Save as .csv",
+                                               filter = ("CSV (*.csv)"))
         if filename[0]:
-            with open(filename[0],'wb') as f:
-                w=csv.writer(f,delimiter=';',quoting = csv.QUOTE_NONE)
-                w.writerow(["Total Eaten:","Total Walked:"])
+            with open(filename[0], 'wb') as f:
+                w = csv.writer(f, delimiter=';', quoting=csv.QUOTE_NONE)
+                w.writerow(["Total Eaten:", "Total Walked:"])
                 for stat in world.statistics:
-                    w.writerow([stat.totaleaten,stat.totalwalked])
+                    w.writerow([stat.totaleaten, stat.totalwalked])
 		    
     def getStatisticString(self):
-        string=""
-        i=1
+        string = ""
+        i = 1
         for stat in world.statistics:
-            string+="year: "+ str(i)+"\n"
-            string+="Total eaten : "+ str(stat.totaleaten)+"\n" 
-            string+="Total walked :"+str(stat.totalwalked)
-            string+="\n"
-            string+="\n"
-            i+=1
+            string += "year: " + str(i) + "\n"
+            string += "Total eaten : " + str(stat.totaleaten) + "\n" 
+            string += "Total walked :" + str(stat.totalwalked)
+            string += "\n"
+            string += "\n"
+            i += 1
         return string
 
 
@@ -168,30 +168,25 @@ class MainWindow(QMainWindow):
         menu = QMenu(self) 
         
         self.SlowAct = QAction("&Slow", self,
-
                 statusTip="Set mode for Slow",
                 triggered=self.slowA)
         
         
         self.NormalAct = QAction("&Normal", self,
-
                 statusTip="Set mode for Normal",
                 triggered=self.normalA)
         
         self.FastAct = QAction("&Fast", self,
-
                 statusTip="Set mode for Fast",
                 triggered=self.fastA)
         
         
         self.SlowAct = QAction("&Slow", self,
-
                 statusTip="Set mode for Fastest",
                 triggered=self.slowA)
         
         
         self.FastestAct = QAction("&Fastest", self,
-
                 statusTip="Set mode for Fast",
                 triggered=self.fastestA)
            
@@ -207,6 +202,7 @@ class MainWindow(QMainWindow):
         
         
         menu.exec_(event.globalPos())
+
     def AddFood(self):
         
         #Toi sijainnin haku kusee viel vahasen.
@@ -216,8 +212,8 @@ class MainWindow(QMainWindow):
         
         h = self.size().height()
         w = self.size().width()
-        location = int(loc[0]*HEIGHT/h) - 3, int(loc[1]*WIDTH/w - 3)
-        world.addFood(Food(location) if not USE_GRAPHICS else FoodLabel(self,location))
+        location = int(loc[0] * HEIGHT / h) - 3, int(loc[1] * WIDTH / w - 3)
+        world.addFood(Food(location) if not USE_GRAPHICS else FoodLabel(self, location))
         print "food added"
         
     def whatsHere(self):
@@ -227,7 +223,7 @@ class MainWindow(QMainWindow):
         
         h = self.size().height()
         w = self.size().width()
-        location = int(loc[0]*HEIGHT/h) - 3, int(loc[1]*WIDTH/w - 3)
+        location = int(loc[0] * HEIGHT / h) - 3, int(loc[1] * WIDTH / w - 3)
         
         if world.getFood(location):
             print "food"
@@ -237,10 +233,10 @@ class MainWindow(QMainWindow):
         
 
     def closeA(self):
-        self.running=False
+        self.running = False
         print self.running  
     
-    def closeEvent(self,event):
+    def closeEvent(self, event):
         self.closeA()
 
     def loadA(self):
@@ -251,12 +247,12 @@ class MainWindow(QMainWindow):
     
     def fastestA(self):
         global USE_GRAPHICS
-        USE_GRAPHICS =False
+        USE_GRAPHICS = False
         print 'changed to no graph'
         self.world.setParent(None)
-        self.world=World()
+        self.world = World()
         global world
-        world=self.world
+        world = self.world
         self.timer.setInterval(0)
         
     def fastA(self):
@@ -279,60 +275,54 @@ class MainWindow(QMainWindow):
     
     def changeToGraphics(self):
         global USE_GRAPHICS
-        USE_GRAPHICS=True
+        USE_GRAPHICS = True
         self.world=WorldLabel()
         self.setCentralWidget(self.world)
         global world
-        world=self.world
+        world = self.world
     
     def doTurn(self):
-        if self.day<200:
+        if self.day < 200:
             for cre in world.creatures.values():
                 cre.doTurn()
+
             for food in world.foods.values():
                 pass
                 #food.animate()
+
             if USE_GRAPHICS:
                 world.update()
-                self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2}  Maximum: {3:03d} Average: {4:03d}'.format(self.year,self.day,self.highscore,world.maximum,int(world.average)))
-            self.day+=1
+                self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2}  Maximum: {3:03d} Average: {4:03d}'\
+                                        .format(self.year, self.day, self.highscore, world.maximum, int(world.average)))
+
+            self.day += 1
+
         else:
             stat = Statistics(self.gen.totalEaten(), self.gen.totalWalked())
-            world.total+=self.gen.totalEaten()
-            if self.gen.totalEaten()>world.maximum: 
-            	world.maximum=self.gen.totalEaten()
-            world.average=world.total/self.year
+            world.total += self.gen.totalEaten()
+
+            if self.gen.totalEaten() > world.maximum: 
+            	world.maximum = self.gen.totalEaten()
+
+            world.average = world.total / self.year
             world.statistics.append(stat)
-            self.highscore=self.gen.totalEaten()
-            self.gen=self.gen.nextGeneration()
+            self.highscore = self.gen.totalEaten()
+            self.gen = self.gen.nextGeneration()
             self.world.removeEverything()
             self.world.populate(self.gen)
-            self.year+=1
-            self.day=1
+            self.year += 1
+            self.day = 1
     
-
-
-# class WorldContainer(object):
-    
-#     @staticmethod
-#     def setWorld(w):
-#         WorldRetriever.wrld = w        
-#         print WorldRetriever.wrld
-        
-#     def getWorld(self):
-#         return WorldRetriever.wrld
-
                
 if __name__ == '__main__':
     global world
-    app=QApplication(sys.argv)
-    mw=MainWindow()
+    app = QApplication(sys.argv)
+    mw = MainWindow()
     mw.show()
     import cProfile
     command = """app.exec_()"""
-    cProfile.runctx( command, globals(), locals(), filename="ga.profile" )
+    cProfile.runctx(command, globals(), locals(), filename="ga.profile" )
     #app.exec_()
                
-    #app.exec_()
     sys.exit()
     
