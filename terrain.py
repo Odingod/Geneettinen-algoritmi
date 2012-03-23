@@ -1,8 +1,17 @@
 import random
-from globals import *
+import globals
 
 X = 0
 Y = 1
+
+def printTerrain(terr):
+    row = ""
+    for x in range(len(terr)):
+        for y in range(len(terr[0])):
+            row  += "[" + str(terr[x][y]) + "]"
+        print row
+        row = ""
+
 
 class Drunkard(object):
     
@@ -54,59 +63,39 @@ class Drunkard(object):
         self.isDead = True
 
     def modifyTerrain(self, location):
-        #print location
-        #print "Alkuperainen:", self.terrain[location[X]][location[Y]]
         self.terrain[location[X]][location[Y]] = self.terrainType
-        #print "Muokattu:", self.terrain[location[X]][location[Y]]
-
+        
     def canMoveTo(self, to):
         if 0 < to[X] < self.terrainWidth and 0 < to[Y] < self.terrainHeight:
             if self.terrain[self.location[X]][self.location[Y]] not in self.forbiddenTypes:
                 return True
         return False
 
-#class WaterDrunkard(Drunkard):
-    """
-    """
-#    def __init__(self, terrain, steps=45):
-#        Drunkard.__init__(self, terrain, steps, 2)
-#        self.forbiddenTypes = []
+class WaterDrunkard(Drunkard):
+    def __init__(self, terrain, steps=45):
+        Drunkard.__init__(self, terrain, steps, 2)
+        self.forbiddenTypes = []
 
 
 class DrunkardTerrainGenerator(object):
-    """
-    """
-    def __init__(self, width, height, amountOfDrunkards=40):
-        """
-        """
-        self.drunkards = []
-        self.terr = [None] * width
-
-        self.terrainWidth = width
-        self.terrainHeight = height
-        self.amountOfDrunkards = amountOfDrunkards
+    def __init__(self):
+        pass
         
-        for x in xrange(self.terrainWidth):
-            self.terr[x] = [0] * self.terrainHeight
-
+    def generate(self, width=globals.WIDTH, height=globals.HEIGHT, amountOfDrunkards=40):
+        terrain = [None] * width
+        for x in xrange(width):
+            terrain[x] = [0] * height
+            
+        drunkards = []
         for x in xrange(amountOfDrunkards):
-            self.drunkards.append(Drunkard(self.terr))
-        
-    def generate(self):
-        for drunkard in self.drunkards:
+            drunkards.append(Drunkard(terrain))
+
+        for drunkard in drunkards:
             while not drunkard.isDead:
                 drunkard.move()
-    
-    def printTerrain(self):
-        row = ""
-        for x in range(len(self.terr)):
-            for y in range(len(self.terr[0])):
-                row  += "[" + str(self.terr[x][y]) + "]"
-            print row
-            row = ""
+        return terrain[:]
 
-#if __name__ == '__main__':
-    #terrain = DrunkardTerrainGenerator(20, 20, 25)
-    #print terrain.drunkens
-    #terrain.generate()
-    #terrain.printTerrain()
+if __name__ == '__main__':
+    terrainGenerator = DrunkardTerrainGenerator()
+    terrain = terrainGenerator.generate(20, 20)
+    printTerrain(terrain)
