@@ -62,6 +62,7 @@ import csv
 from world import *
 from food import *
 from globals import *
+import terrain
 #import creature
 
 import sys, time
@@ -110,7 +111,7 @@ class MainWindow(QMainWindow):
         self.normal.triggered.connect(self.normalA)
         self.slow.triggered.connect(self.slowA)
         self.settings.triggered.connect(self.settingsA)
-        
+        self.terrainGenerator = terrain.DrunkardTerrainGenerator(width=WIDTH+1, height=HEIGHT+1)
         
         
         self.world = WorldLabel() if USE_GRAPHICS else World()
@@ -120,6 +121,7 @@ class MainWindow(QMainWindow):
         global world
         world = self.world
         self.genret = WorldRetriever(world)
+        self.makeNewTerrain(terrainGenerator=self.terrainGenerator)
         self.gen = Generation(10)
         self.world.populate(self.gen)
         self.year = 1
@@ -202,6 +204,21 @@ class MainWindow(QMainWindow):
         
         
         menu.exec_(event.globalPos())
+
+    def makeNewTerrain(self, terrainGenerator=None, filename=None):
+        """
+        Luo uuden maaston, mutta ei uutta maailmaa
+        Arguments:
+        - `terrainGenerator`: which terrainGenerator you want to use
+        - `filename`: if you want to load terrain from file, specify it here
+        - If you specify both filename and terrainGenerator, terrain will be loaded
+        from file
+        """
+        if filename is None and isinstance(terrainGenerator, terrain.DrunkardTerrainGenerator):
+            world.makeTerrain(terrainGenerator)
+
+        elif isinstance(filename, str):
+            world.loadTerrain(filename)
 
     def AddFood(self):
         

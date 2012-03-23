@@ -49,9 +49,9 @@ class Creature(object):
         self.sight = 0
         self.memory = 0
         self.walked = 0
-
+        self.accessibleTerrain = ['grass']
         if genome is None:
-            self.genome = [[(randint(0, len(choices)), randint(0, 15)) for y in xrange(4)] for x in xrange(16)]
+            self.genome = [[(randint(0, len(choices) - 1), randint(0, 15)) for y in xrange(4)] for x in xrange(16)]
         else: self.genome = genome
             
         self.eaten = 1
@@ -88,6 +88,7 @@ class Creature(object):
             world.removeFood(world.getFood(newloc))
             self.eaten += 1
             self.calories += 50
+
             
     def nextLoc(self):
         '''
@@ -95,10 +96,19 @@ class Creature(object):
         '''
         newloc = (self.loc[0] + self.heading[0], self.loc[1] + self.heading[1])
 
-        if newloc[0] < 0: newloc = (0, newloc[1])
-        elif newloc[0] > WIDTH: newloc = (WIDTH, newloc[1])
-        if newloc[1] < 0: newloc = (newloc[0], 0)
-        elif newloc[1] > HEIGHT: newloc = (newloc[0], HEIGHT)
+        if newloc[0] < 0:
+            newloc = (0, newloc[1])
+        elif newloc[0] > WIDTH:
+            newloc = (WIDTH, newloc[1])
+            
+        if newloc[1] < 0:
+            newloc = (newloc[0], 0)
+        elif newloc[1] > HEIGHT:
+            newloc = (newloc[0], HEIGHT)
+
+        self.nextTerrainType = getAssociatedKey(ID=world.terrain[newloc[0]][newloc[1]])
+        if self.nextTerrainType not in self.accessibleTerrain:
+            return (self.loc[0], self.loc[1])
 
         return newloc
     
@@ -120,13 +130,14 @@ class Creature(object):
         Updates sight based on what is infront of the creature
         '''
         nextLocation = self.nextLoc()
-
+        outOfBounds = nextLocation == self.loc
+        
         if world.getCreature(nextLocation) is not None and world.getCreature(nextLocation) is not self: 
             self.sight = sights['CREATURE']
 
         elif world.getFood(nextLocation) is not None:
             self.sight = sights['VEGETABLE']
-        elif nextLocation == self.loc:
+        elif outOfBounds or self.nextTerrainType == 'wall':
             self.sight = sights['WALL']
         else: self.sight = sights['NOTHING']
     
@@ -172,7 +183,7 @@ class Creature(object):
         http://en.wikipedia.org/wiki/Crossover_%28genetic_algorithm%29
         ''' 
         newGenome = [[None] * 4 for x in xrange(16)]
-        a, b = randint(0, 3), randint(0, 15)
+        a, b = randint(0, len(choices) - 1), randint(0, 15)
 
         for x in xrange(16):
             for y in xrange(4):

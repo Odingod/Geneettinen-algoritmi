@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+import random
 from creature import *#Creature, CreatureLabel, Generation
 from food import Food, FoodLabel
-
+import terrain
+import io
 from globals import *
 
 class World(object):
@@ -9,38 +11,84 @@ class World(object):
     Object that contains all the creatures of the generation and food
     '''
     def __init__(self):
+        # self.terrainGenerator = None
+        self.terrain = []
         self.creatures = {}
         self.foods = {}
         self.statistics = []
         self.maximum = 0
         self.total = 0
         self.average = 0.0
-   
+
+    def makeTerrain(self, terrainGenerator):
+        """
+        
+        Arguments:
+        - `width`:
+        - `height`:
+        - `drunkards`:
+        """
+
+        terrainGenerator.generate()
+        self.terrain = terrainGenerator.terr
+
+    def loadTerrain(self, filename):
+        """
+        
+        Arguments:
+        - `filename`: filename of terrain file
+        """
+        self.terrain = io.mapFileToArray(filename)
+
         
     def addCreature(self, creature):
         '''
         Adds creature if there's no other creature at the same spot, else tries to put creature somewhere else
         '''
-        try:
-            self.creatures[creature.loc]
-        except KeyError:
-            self.creatures[creature.loc] = creature
-            return
-        creature.loc = (randint(0, WIDTH), randint(0, HEIGHT))
-        self.addCreature(creature)
+        # Minusta tämä pohjakoodi oli niin epäselvää, että minun oli pakko tehdä
+        # oma versio... ottakaan  koodi pois kommenteista jos se toimi paremmin
+        # tai oli mielestänne jotenkin selkeää
+        
+        # try:
+        #     self.creatures[creature.loc]
+        # except KeyError:
+        #     self.creatures[creature.loc] = creature
+        #     return
+        # creature.loc = (randint(0, WIDTH), randint(0, HEIGHT))
+        # self.addCreature(creature)
+        inserted = False
+        while not inserted:
+            x = random.randint(0, WIDTH)
+            y = random.randint(0, HEIGHT)
+            creature.loc = x, y
+            terrainType = getAssociatedKey(ID=self.terrain[x][y])
+            if creature.loc not in self.creatures and terrainType == 'grass':
+                inserted = True
+                self.creatures[creature.loc] = creature
         
     
     def addFood(self, food):
         '''
         Adds food if there's no other creature at the same spot, else tries to put food somewhere else
         '''
-        try:
-            self.foods[food.loc]
-        except KeyError:
-            self.foods[food.loc] = food
-            return
-        food.loc = (randint(0, WIDTH), randint(0, HEIGHT))
-        self.addFood(food)
+
+        # try:
+        #     self.foods[food.loc]
+        # except KeyError:
+        #     self.foods[food.loc] = food
+        #     return
+        # food.loc = (randint(0, WIDTH), randint(0, HEIGHT))
+        # self.addFood(food)
+
+        inserted = False
+        while not inserted:
+            x = random.randint(0, WIDTH)
+            y = random.randint(0, HEIGHT)
+            food.loc = x, y
+            terrainType = getAssociatedKey(ID=self.terrain[x][y])
+            if food.loc not in self.foods and terrainType != 'wall':
+                inserted = True
+                self.foods[food.loc] = food
     
     def removeFood(self, food):
         del self.foods[food.loc]
@@ -112,7 +160,6 @@ class Statistics():
         self.totalwalked = totalwalked
     
 
-                
 class WorldLabel(QWidget, World):
     def __init__(self, parent=None):        
         QWidget.__init__(self, parent)

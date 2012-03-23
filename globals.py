@@ -53,7 +53,7 @@ def getAssociatedRGB(terrainKey="", terrainID=-1):
             if terrainType[IDINDEX] == terrainID:
                 return terrainType[RGBINDEX]
             
-def getAssociatedID(rgb):
+def getAssociatedID(rgb=None, key=None):
     """
     Arguments:
     - `rgb`: rgb-value to lookup 
@@ -66,14 +66,18 @@ def getAssociatedID(rgb):
     print id
     Output: 0
     """
-    for terrainType in TERRAINTYPES.values():
-        if terrainType[RGBINDEX] == rgb:
-            return terrainType[IDINDEX]
+    if key is None:
+        for terrainType in TERRAINTYPES.values():
+            if terrainType[RGBINDEX] == rgb:
+                return terrainType[IDINDEX]
+    elif key is not None:
+        return TERRAINTYPES[key][IDINDEX]
 
-def getAssociatedKey(rgb):
+def getAssociatedKey(rgb=None, ID=None):
     """
     Arguments:
-    - `rgb`: rgb-value to lookup 
+    - `rgb`: rgb-value to lookup
+    - `ID`: ID to lookup 
 
     Returns:
     key associated with given rgb-value
@@ -87,3 +91,7 @@ def getAssociatedKey(rgb):
     for key, value in TERRAINTYPES.items():
         if value[RGBINDEX] == rgb:
             return key
+        elif value[IDINDEX] == ID:
+            return key
+
+    
