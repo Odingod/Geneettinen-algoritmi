@@ -23,3 +23,66 @@ TERRAINTYPES = {
     'water' : (2, (0, 0, 255))
 
  }
+
+
+IDINDEX = 0
+RGBINDEX = 1
+
+def getAssociatedRGB(terrainKey="", terrainID=-1):
+    """
+    Arguments:
+    - `terrainKey`: String that defines terrain type
+    - `terrainID`: ID that defines terrain type
+    - NOTE: giving both arguments causes error
+
+    Returns:
+    RGB-color as tuple
+
+    Example:
+    rgb = globals.getAssociatedRGB(terrainKey="grass")
+    print rgb
+    Output:
+    (0, 255, 0)
+    """
+
+    if terrainKey != "" and terrainID == -1:
+        return TERRAINTYPES['terrainKey'][RGBINDEX]
+
+    elif terrainKey == "" and terrainID != -1:
+        for terrainType in TERRAINTYPES.values():
+            if terrainType[IDINDEX] == terrainID:
+                return terrainType[RGBINDEX]
+def getAssociatedID(rgb):
+    """
+    Arguments:
+    - `rgb`: rgb-value to lookup 
+
+    Returns:
+    ID associated with given rgb-value
+
+    Example:
+    id = globals.getAssociatedID((0, 0, 0))
+    print id
+    Output: 0
+    """
+    for terrainType in globals.TERRAINTYPES.values():
+        if terrainType[RGBINDEX] == rgb:
+            return terrainType[IDINDEX]
+
+def getAssociatedKey(rgb):
+    """
+    Arguments:
+    - `rgb`: rgb-value to lookup 
+
+    Returns:
+    key associated with given rgb-value
+
+    Example:
+    key = globals.getAssociatedKey((0, 0, 0))
+    print key
+    Output: "wall"
+    
+    """
+    for key, value in globals.TERRAINTYPES.items():
+        if value[RGBINDEX] == rgb:
+            return key
