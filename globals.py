@@ -52,6 +52,7 @@ def getAssociatedRGB(terrainKey="", terrainID=-1):
         for terrainType in TERRAINTYPES.values():
             if terrainType[IDINDEX] == terrainID:
                 return terrainType[RGBINDEX]
+            
 def getAssociatedID(rgb):
     """
     Arguments:
@@ -65,7 +66,7 @@ def getAssociatedID(rgb):
     print id
     Output: 0
     """
-    for terrainType in globals.TERRAINTYPES.values():
+    for terrainType in TERRAINTYPES.values():
         if terrainType[RGBINDEX] == rgb:
             return terrainType[IDINDEX]
 
@@ -83,6 +84,6 @@ def getAssociatedKey(rgb):
     Output: "wall"
     
     """
-    for key, value in globals.TERRAINTYPES.items():
+    for key, value in TERRAINTYPES.items():
         if value[RGBINDEX] == rgb:
             return key
