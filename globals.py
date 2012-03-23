@@ -15,3 +15,11 @@ CREATURE_PIC = [QImage('jpac.png').transformed(QTransform().rotate(a)) for a in 
 FOOD_PIC = QImage('food16.png')
 CORPSE_PIC = QImage('pacdead.png')
 MUTATE = 10 #chance of mutation in ‰
+TERRAINTYPES = {
+    #format: 
+    #'type' : (ID, (red, green, blue))
+    'wall' : (0, (0, 0, 0)),
+    'grass' : (1, (0, 255, 0)),
+    'water' : (2, (0, 0, 255))
+
+ }
