@@ -30,7 +30,7 @@ class World(object):
         """
 
         terrainGenerator.generate()
-        self.terrain = terrainGenerator.terr
+        self.terrain = terrainGenerator.terrain
 
     def loadTerrain(self, filename):
         """

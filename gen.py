@@ -182,14 +182,8 @@ class MainWindow(QMainWindow):
                 statusTip="Set mode for Fast",
                 triggered=self.fastA)
         
-        
-        self.SlowAct = QAction("&Slow", self,
-                statusTip="Set mode for Fastest",
-                triggered=self.slowA)
-        
-        
         self.FastestAct = QAction("&Fastest", self,
-                statusTip="Set mode for Fast",
+                statusTip="Set mode for Fastest",
                 triggered=self.fastestA)
            
         

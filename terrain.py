@@ -12,7 +12,6 @@ def printTerrain(terr):
         print row
         row = ""
 
-
 class Drunkard(object):
     
     def __init__(self, terrain, steps=45, terrainType=1):
@@ -78,24 +77,26 @@ class WaterDrunkard(Drunkard):
 
 
 class DrunkardTerrainGenerator(object):
-    def __init__(self):
-        pass
-        
-    def generate(self, width=globals.WIDTH, height=globals.HEIGHT, amountOfDrunkards=40):
-        terrain = [None] * width
-        for x in xrange(width):
-            terrain[x] = [0] * height
-            
-        drunkards = []
-        for x in xrange(amountOfDrunkards):
-            drunkards.append(Drunkard(terrain))
+    def __init__(self, width=globals.WIDTH + 1, height=globals.HEIGHT + 1, amountOfDrunkards=2*(globals.WIDTH + globals.HEIGHT)/2 + random.randint(0, 25)):
+        self.terrain = [None] * width
+        self.amountOfDrunkards = amountOfDrunkards
 
-        for drunkard in drunkards:
+        for x in xrange(width):
+            self.terrain[x] = [0] * height
+            
+        self.drunkards = []
+        for x in xrange(self.amountOfDrunkards):
+            self.drunkards.append(Drunkard(self.terrain))
+    
+    def generate(self):
+        for drunkard in self.drunkards:
             while not drunkard.isDead:
                 drunkard.move()
-        return terrain[:]
+
+    def getTerrainData(self):
+        return self.terrain
 
 if __name__ == '__main__':
     terrainGenerator = DrunkardTerrainGenerator()
-    terrain = terrainGenerator.generate(20, 20)
-    printTerrain(terrain)
+    terrainGenerator.generate()
+    printTerrain(terrainGenerator.terrain)
