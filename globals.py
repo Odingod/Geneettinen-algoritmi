@@ -14,15 +14,26 @@ USE_GRAPHICS = True
 CREATURE_PIC = [QImage('jpac.png').transformed(QTransform().rotate(a)) for a in xrange(0,360,90)]
 FOOD_PIC = QImage('food16.png')
 CORPSE_PIC = QImage('pacdead.png')
+
+WALL_PIC = QImage('wall.png')
+GRASS_PIC = QImage('grass.png')
+WATER_PIC = QImage('water.png')
+
+
 MUTATE = 10 #chance of mutation in ‰
 TERRAINTYPES = {
     #format: 
     #'type' : (ID, (red, green, blue))
-    'wall' : (0, (0, 0, 0)),
-    'grass' : (1, (0, 255, 0)),
-    'water' : (2, (0, 0, 255))
-
+    'wall': (0, (0, 0, 0)),
+    'grass': (1, (0, 255, 0)),
+    'water': (2, (0, 0, 255))
  }
+
+TERRAINTYPEIMAGE = {
+    'wall': WALL_PIC,
+    'grass': GRASS_PIC,
+    'water': WATER_PIC
+}
 
 
 IDINDEX = 0

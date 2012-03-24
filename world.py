@@ -13,6 +13,7 @@ class World(object):
     def __init__(self):
         # self.terrainGenerator = None
         self.terrain = []
+        self.tiles = []
         self.creatures = {}
         self.foods = {}
         self.statistics = []
@@ -31,6 +32,7 @@ class World(object):
 
         terrainGenerator.generate()
         self.terrain = terrainGenerator.terrain
+        self.drawTerrain()
 
     def loadTerrain(self, filename):
         """
@@ -39,7 +41,28 @@ class World(object):
         - `filename`: filename of terrain file
         """
         self.terrain = io.mapFileToArray(filename)
+        self.drawTerrain()
 
+    def drawTerrain(self):
+        # loc = (20, 20)
+        # key = getAssociatedKey(ID=self.getTerrainID(loc))
+        # if not USE_GRAPHICS:
+        #     self.addTile(Tile(key, loc))
+        # else:
+        #     self.addTile(TileLabel(key, loc, self))
+        
+        for x in xrange(len(self.terrain)):
+            for y in xrange(len(self.terrain[0])):
+                loc = (x, y)
+                key = getAssociatedKey(ID=self.getTerrainID(loc))
+                if not USE_GRAPHICS:
+                    self.addTile(Tile(key, loc))
+                else:
+                    self.addTile(TileLabel(key, loc, self))
+
+
+    def addTile(self, tile):
+        self.tiles.append(tile)
         
     def addCreature(self, creature):
         '''
@@ -115,6 +138,12 @@ class World(object):
             return self.foods[loc]
         except KeyError:
             return None
+
+    def getTerrainID(self, loc):
+        try:
+            return self.terrain[loc[0]][loc[1]]
+        except KeyError:
+            return None
         
     def removeEverything(self):
         for creature in self.creatures.values():
@@ -159,6 +188,21 @@ class Statistics():
         self.totaleaten = totaleaten
         self.totalwalked = totalwalked
     
+class Tile(object):
+    def __init__(self, key, loc):
+        self.key = key
+        self.loc = loc
+
+class TileLabel(QLabel, Tile):
+    def __init__(self, key, loc, parent):
+        QLabel.__init__(self, parent)
+        Tile.__init__(self, key, loc)
+        self.resize(QSize(GRIDSIZE, GRIDSIZE))
+        self.show()
+        self.animationStep = 0
+        self.originalPic = QPixmap.fromImage(TERRAINTYPEIMAGE[key])
+        self.setPixmap(self.originalPic)
+        self.setAttribute(Qt.WA_DeleteOnClose)
 
 class WorldLabel(QWidget, World):
     def __init__(self, parent=None):        
@@ -168,18 +212,27 @@ class WorldLabel(QWidget, World):
         self.resize(GRIDSIZE * WIDTH, GRIDSIZE * HEIGHT)
         self.bool = False
         
-   
+    # def drawBackground(self):
+    #     """
+    #     """
+    #     for x in xrange(WIDTH):
+    #         for y in xrange(HEIGHT):
+    #             super(WorldLabel, self).
+
     
     def sizeHint(self, *args, **kwargs):
         return QSize(GRIDSIZE * (WIDTH + 1), GRIDSIZE * (HEIGHT + 1))
     
     def update(self):
+        for tile in self.tiles:
+            tile.move(tile.loc[0] * GRIDSIZE, tile.loc[1] * GRIDSIZE)
         for loc, cre in self.creatures.iteritems():
             cre.move(loc[0] * GRIDSIZE, loc[1] * GRIDSIZE)
     
     def updateFoods(self):
         for loc, food in self.foods.iteritems():
             food.move(loc[0] * GRIDSIZE, loc[1] * GRIDSIZE)
+
     
     def removeFood(self, food):
         food.setParent(None)

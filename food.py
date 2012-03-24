@@ -9,14 +9,15 @@ from gen import *
 from globals import *
 #from world import *
 
+
 class Food(object):
     '''
     Very basic food object
     '''
     def __init__(self, loc):
         self.loc = loc
-        
-        
+
+
 class FoodLabel(QLabel, Food):
     '''
     Object that can be added to WorldLabel
@@ -33,6 +34,4 @@ class FoodLabel(QLabel, Food):
 
     def animate(self):
         self.setPixmap(self.originalPic.transformed(QTransform().rotate([-45, 0, 45, 0][self.animationStep])))
-        self.animationStep = (self.animationStep + 1) % 4  
-    
-    
+        self.animationStep = (self.animationStep + 1) % 4
