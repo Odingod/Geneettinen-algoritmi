@@ -72,15 +72,36 @@ class Drunkard(object):
         return False
 
 class WaterDrunkard(Drunkard):
-    def __init__(self, terrain, steps=45):
+    def __init__(self, terrain, steps=40):
         Drunkard.__init__(self, terrain, steps, 2)
         self.forbiddenTypes = []
 
+    def move(self):
+        choice = random.choice(self.choices.values())
+        location = self.location
+        if choice == 0 or choice == 2:
+            if self.canMoveTo((location[X], location[Y] + 1)):
+                self.location = (location[X], location[Y] + 1)
+                
+        elif choice == 1 or choice == 3:
+            if self.canMoveTo((location[X] - 1, location[Y])):
+                self.location = (location[X] - 1, location[Y])
 
+        if self.stepCount < self.maxSteps:
+            self.stepCount += 1
+            self.modifyTerrain(location)
+        else:
+            self.die()   
+        
 class DrunkardTerrainGenerator(object):
-    def __init__(self, width=globals.WIDTH + 1, height=globals.HEIGHT + 1, amountOfDrunkards=(globals.WIDTH+globals.HEIGHT + random.randint(0, 25))):
+    def __init__(self, width=globals.WIDTH + 1, height=globals.HEIGHT + 1, amountOfDrunkards=-1, generateWater=False):
         self.terrain = [None] * width
-        self.amountOfDrunkards = amountOfDrunkards
+        if amountOfDrunkards == -1:
+            self.amountOfDrunkards = (globals.WIDTH+globals.HEIGHT + random.randint(0, 25))
+
+        else:
+            self.amountOfDrunkards = amountOfDrunkards
+        self.generateWater = generateWater
 
         for x in xrange(width):
             self.terrain[x] = [0] * height
@@ -89,7 +110,18 @@ class DrunkardTerrainGenerator(object):
         for x in xrange(self.amountOfDrunkards):
             self.drunkards.append(Drunkard(self.terrain))
     
+        if generateWater:
+            self.waterDrunkards = []
+        
+            for x in xrange(self.amountOfDrunkards):
+                self.waterDrunkards.append(WaterDrunkard(self.terrain))
+
     def generate(self):
+        if self.generateWater:
+            for waterDrunkard in self.waterDrunkards:
+                while not waterDrunkard.isDead:
+                    waterDrunkard.move()
+
         for drunkard in self.drunkards:
             while not drunkard.isDead:
                 drunkard.move()
