@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import png
 import globals
-
+import datetime
 
 def transpose(arry):
     """
@@ -85,7 +85,7 @@ def mapFileToArray(filename):
 
     # imageData = mapFileToImageData(file)
     # arry = colorDataToArray(imageData)
-
+    
     return arry
 
 
@@ -133,7 +133,7 @@ def colorDataToMapFile(colorData, filename):
         print "ERROR writing to file", filename
 
 
-def arrayToFile(arry, filename):
+def arrayToFile(arry, filename=""):
     """
     This is a helper function to save terrain-data to image file
     Arguments:
@@ -147,6 +147,10 @@ def arrayToFile(arry, filename):
     image-file, which you can load back to array with
     mapFileToArray-function
     """
+    if filename == "":
+        filename += "map-"
+        filename += datetime.datetime.now().isoformat().replace(".", "-").replace(":", "-")
+        filename += ".png"
     colorData = arrayToColorData(arry)
     colorDataToMapFile(colorData, filename)
 

@@ -1,5 +1,6 @@
 import random
 import globals
+import io
 
 X = 0
 Y = 1
@@ -77,7 +78,7 @@ class WaterDrunkard(Drunkard):
 
 
 class DrunkardTerrainGenerator(object):
-    def __init__(self, width=globals.WIDTH + 1, height=globals.HEIGHT + 1, amountOfDrunkards=2*(globals.WIDTH + globals.HEIGHT)/2 + random.randint(0, 25)):
+    def __init__(self, width=globals.WIDTH + 1, height=globals.HEIGHT + 1, amountOfDrunkards=(globals.WIDTH+globals.HEIGHT + random.randint(0, 25))):
         self.terrain = [None] * width
         self.amountOfDrunkards = amountOfDrunkards
 
@@ -96,7 +97,11 @@ class DrunkardTerrainGenerator(object):
     def getTerrainData(self):
         return self.terrain
 
+    def saveMap(self, filename=""):
+        io.arrayToFile(self.terrain, filename)
+
 if __name__ == '__main__':
     terrainGenerator = DrunkardTerrainGenerator()
     terrainGenerator.generate()
     printTerrain(terrainGenerator.terrain)
+    terrainGenerator.saveMap()
