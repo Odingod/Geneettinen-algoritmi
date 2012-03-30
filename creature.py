@@ -10,6 +10,7 @@ from random import choice
 #from world import *
 from globals import *
 import gen
+import io
 
 
 class WorldRetriever(object):
@@ -58,6 +59,8 @@ class Creature(object):
         self.calories = 500
         self.dead = False
 
+        #io.creaturesToXML([self])
+
 
     def isDead(self):
         return self.dead
@@ -81,7 +84,7 @@ class Creature(object):
 
             if self.calories < 0:
                 self.dead = True
-
+                
             world.updateLocation(self, newloc)
 
         if world.getFood(newloc) is not None:
@@ -188,7 +191,7 @@ class Creature(object):
         for x in xrange(16):
             for y in xrange(4):
                 if randint(0, 1000) < MUTATE:
-                    newGenome[x][y] = (randint(0, 2), randint(0, 15))
+                    newGenome[x][y] = (randint(0, len(choices) - 1), randint(0, 15))
                 elif x is b and y > a:
                     newGenome[x][y] = other.genome[x][y]
                 elif x > b:

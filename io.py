@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
-import png
-import globals
 import datetime
+import sys
+from xml.etree import ElementTree
+from xml.etree.ElementTree import Element, SubElement, Comment
+from xml.dom import minidom
+
+import png
+
+import globals
+
 
 def transpose(arry):
     """
@@ -12,23 +19,10 @@ def transpose(arry):
     """
     return [map(lambda li: li[i], arry) for i in range(len(arry[0]))]
 
+def dateString():
+    string = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    return string
 
-# def mapFileToImageData(filename):
-#     """
-#     Arguments:
-#     - `filename`:
-#     Returns:
-#     Color-data from map-file
-#     """
-#     try:
-#         f = open(filename, 'rb')
-#         pngReader = png.Reader(file=f)
-#         imageData = pngReader.asRGB()
-#         f.close()
-#         return imageData
-#     except:
-#         print "ERROR: problem reading file"
-#         print "Perhaps it's missing or you are trying to open non-png file?"
 
 def imageDataToArray(imageData):
     """
@@ -149,10 +143,75 @@ def arrayToFile(arry, filename=""):
     """
     if filename == "":
         filename += "map-"
-        filename += datetime.datetime.now().isoformat().replace(".", "-").replace(":", "-")
+        filename += dateString()
         filename += ".png"
     colorData = arrayToColorData(arry)
     colorDataToMapFile(colorData, filename)
+
+def creaturesToXML(creatures, filename=""):
+    """
+    
+    Arguments:
+    - `creatures`: List of creatures object
+    - `filename`: Filename. If omitted, function will generate it's own name
+    """
+
+    root = Element("creatures")
+    for cre in creatures:
+        cElement = SubElement(root, "creature")
+        
+        loc = SubElement(cElement, "location")
+        x = SubElement(loc, "x")
+        x.text = str(cre.loc[0])
+        y = SubElement(loc, "y")
+        y.text = str(cre.loc[1])
+        
+        heading = SubElement(cElement, "heading")
+        hx = SubElement(heading, "x")
+        hx.text = str(cre.heading[0])
+        hy = SubElement(heading, "y")
+        hy.text = str(cre.heading[1])
+
+        memory = SubElement(cElement, "memory")
+        memory.text = str(cre.memory)
+        
+        accessible = SubElement(cElement, "accessibleTerrain")
+        for tType in cre.accessibleTerrain:
+            terrain = SubElement(accessible, "type")
+            terrain.text = tType
+
+        genome = SubElement(cElement, "genome")
+        for mem in cre.genome:
+            mElement = SubElement(genome, "memory")
+            for pair in mem:
+                pElement = SubElement(mElement, "pair")
+                action = SubElement(pElement, "action")
+                action.text = str(pair[0])
+                somethingIDontKnow = SubElement(pElement, "something")
+                somethingIDontKnow.text = str(pair[1])
+                
+        calories = SubElement(cElement, "calories")
+        calories.text = str(cre.calories)
+        
+        walked = SubElement(cElement, "walked")
+        walked.text = str(cre.walked)
+
+        eaten = SubElement(cElement, "eaten")
+        eaten.text = str(cre.eaten)
+        
+    raw = ElementTree.tostring(root)
+    parsed = minidom.parseString(raw)
+    parsed = parsed.toprettyxml(indent="  ")
+
+    if filename == "":
+        filename += "creatures-"
+        filename += dateString()
+        filename += ".xml"
+
+    f = open(filename, 'w')
+    f.write(parsed)
+    f.close()
+
 
 if __name__ == '__main__':
     terrain = mapFileToArray("otus.png")
