@@ -58,6 +58,7 @@ class Creature(object):
         self.eaten = 1
         self.calories = 500
         self.dead = False
+        self.miles = []
 
         #io.creaturesToXML([self])
 
@@ -81,6 +82,8 @@ class Creature(object):
    
         if world.getCreature(newloc) is None:
             self.calories -= 10
+            if newloc not in self.miles:
+                self.miles.append(newloc)
 
             if self.calories < 0:
                 self.dead = True
@@ -98,6 +101,8 @@ class Creature(object):
         Tells the creature's next possible location
         '''
         newloc = (self.loc[0] + self.heading[0], self.loc[1] + self.heading[1])
+        #print newloc
+#        print self.heading
 
         if newloc[0] < 0:
             newloc = (0, newloc[1])
@@ -161,20 +166,55 @@ class Creature(object):
         elif self.heading == WEST: self.turnSelf(EAST)
         elif self.heading == SOUTH: self.turnSelf(NORTH)
         elif self.heading == EAST: self.turnSelf(WEST)
+        
+    def foodAround(self):
+        '''
+        returns the direction where is food or False if there isn't food near
+        '''
+        if self.heading == NORTH:
+            left = (self.loc[0] - 1, self.loc[1])
+            right = (self.loc[0] + 1, self.loc[1])
+        elif self.heading == WEST:
+            left = (self.loc[0], self.loc[1] + 1)
+            right = (self.loc[0], self.loc[1] - 1)
+        elif self.heading == SOUTH:
+            left = (self.loc[0] + 1, self.loc[1])
+            right = (self.loc[0] - 1, self.loc[1])
+        elif self.heading == EAST:
+            left = (self.loc[0], self.loc[1] - 1)
+            right = (self.loc[0], self.loc[1] + 1)
+        if world.getFood(left) is not None:
+            return "left"
+        elif world.getFood(right) is not None:
+            return "right"
+        else:
+            return False
 
         
     def doAction(self):
         '''
         Does the action defined by the genome
         '''
-        #if self.sight!=0:  print self.memory,self.sight
+        #if self.sight!=0:  
+#        print self.memory,self.sight
         a, b = self.genome[self.memory][self.sight]
-        if a == choices['LEFT']: self.turnLeft()
-        elif a == choices['RIGHT']: self.turnRight()
-        elif a == choices['AROUND']: self.turnAround()
-        elif a == choices['MOVE']: self.moveSelf()
+        if self.sight == sights['VEGETABLE']:
+            self.moveSelf()
+        elif self.foodAround() != False:
+            if self.foodAround() == "left":
+                self.turnLeft()
+            else:
+                self.turnRight()
+        else:
+            if a == choices['LEFT']: self.turnLeft()
+            elif a == choices['RIGHT']: self.turnRight()
+            elif a == choices['AROUND']: self.turnAround()
+            elif a == choices['MOVE']: self.moveSelf()
 
         self.memory = b
+        
+    def fitness(self):
+        return (len(self.miles) + self.eaten - 1)
         
     def combine(self,other):
         '''
@@ -265,10 +305,10 @@ class Generation(object):
         Generates new generation and returns it.
         
         First it creates a list candidates which contains list indices of creatures.
-        The more the creature has eaten the more places it gets on the candidate list.
+        The more the creature has eaten and visited places the more places it gets on the candidate list.
         Then new creatures are created by randomly choosing the creatures to combine.         
         '''
-        candidates = sum([[i] * self.creatures[i].eaten for i in xrange(len(self.creatures))], []) #sum is used to flatten the list of lists
+        candidates = sum([[i] * self.creatures[i].fitness() for i in xrange(len(self.creatures))], []) #sum is used to flatten the list of lists
         creatures = []
 
         for x in xrange(self.size):
