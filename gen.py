@@ -403,7 +403,6 @@ class Cmd(QWidget):
         self.parent = parent
         self.commandList = QListWidget(self)
         self.commandList.addItem(parent.prthelp())
-        
         self.input = QLineEdit(self)
         self.button = QPushButton("&Enter", self)
         self.button.clicked.connect(self.button_click_event)
