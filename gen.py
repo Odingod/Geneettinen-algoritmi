@@ -169,6 +169,7 @@ class MainWindow(QMainWindow):
         
         menu = QMenu(self) 
         
+        self.DockAct = QAction("&Open cmd", self, triggered = self.showdoc)
         self.SlowAct = QAction("&Slow", self,
                 statusTip="Set mode for Slow",
                 triggered=self.slowA)
@@ -195,7 +196,7 @@ class MainWindow(QMainWindow):
         SpeedMenu.addAction(self.FastestAct)
         menu.addAction(self.AddFoodAct)
         menu.addAction(self.whatsHereAct)
-        
+        menu.addAction(self.DockAct)
         
         menu.exec_(event.globalPos())
 
@@ -324,7 +325,125 @@ class MainWindow(QMainWindow):
             self.year += 1
             self.day = 1
     
-               
+    
+    def exec_comand_string(self, string):
+        if len(string) <= 0:
+                return ""
+        if string[0] != '/':
+            return "Command must start with '/'\n"
+        string = string[1:]
+        
+        Parts = string.split(' ')
+        command = Parts[0]
+        Args = Parts[1:]
+        
+        
+        
+        if command == "help":
+            return self.prthelp()
+            
+        elif command == "quit":
+            app.quit()
+            
+        elif command == "addfood":
+            try:
+                world.addFood(Food((int(Args[0]), int(Args[1]))) if not USE_GRAPHICS else FoodLabel(self, (int(Args[0]), int(Args[1]))))
+            except:
+                return "Unknown parameters in command" +string
+        
+        elif command == "addcreature":
+            try:
+                heading = None
+                if Args[2] == "NORTH":
+                    heading = (0, -1)
+                elif  Args[2] == "EAST":
+                    heading  = (1, 0)
+                elif Args[2] =="SOUTH":
+                    heading = (0, 1)
+                elif Args[2] == "WEST":
+                    heading = (-1, 0)
+                else:
+                    return "Unknown parameters in command" +string
+                
+                if len(Args)==3:
+
+                    creature = Creature((int(Args[0]), int(Args[1]), heading))
+                    world.addCreature(creature)
+                elif len(Args)==4:
+                    creature = Creature((int(Args[0]), int(Args[1]), heading), Args[4])
+                    world.addCreature(creature)
+            except:
+                return "Unknown parameters in command" +string
+        else:
+            return "Unknown command "+command
+    
+    
+    
+    def prthelp(self):
+        return ("Available commands:\n"
+                "/help                          | Prints available commands and instructions to use commandline.\n"\
+                "/quit                          | Shuts down gen.py.\n"
+                "/addfood x y                   | Adds food to given location. Parameters x and y must be integers in range (0, 40).\n"
+                "/deleteall                     | Erases every object from the map.\n"
+                "/addcreature x y heading genome| Adds new creature defined by given genome to location (x, y) with heading towards given parameter.\n"
+                "                               | Given genome must be proper tuple as defined in creature constructor or genome can be given as a empty parameter,\n"
+                "                               | thus genome is constructed by random. Heading must be one of the following: NORTH, EAST, SOUTH, WEST.\n")
+                                               
+        
+    def showdoc(self):
+        self.cmd=Cmd(self)
+        
+    
+class Cmd(QWidget):
+    def __init__(self, parent=None):
+        super(Cmd, self).__init__(parent)
+        super(Cmd, self).setWindowFlags(Qt.Window)
+        self.commands = []
+        self.currentcommand = 0
+        self.parent = parent
+        self.commandList = QListWidget(self)
+        self.commandList.addItem(parent.prthelp())
+        
+        self.input = QLineEdit(self)
+        self.button = QPushButton("&Enter", self)
+        self.button.clicked.connect(self.button_click_event)
+        
+        
+        layout = QVBoxLayout()
+        layout.addWidget(self.commandList)
+        layout.addWidget(self.input)
+        layout.addWidget(self.button)
+        
+        self.setLayout(layout)
+        self.show()
+        
+    def button_click_event(self):
+        self.commandList.addItem(self.input.text())
+        self.commands[len(self.commands)]=self.input.text()
+        self.commands.append("")
+    
+        text = self.parent.exec_comand_string(self.input.text())
+        self.commandList.addItem(text)
+        self.input.setText("")
+        self.currentcommand = len(self.commands)
+    def keyPressEvent(self, event):
+        if event.key() == 16777220:
+            self.commandList.addItem(self.input.text())
+            self.commands.append("")
+            self.commands[len(self.commands)-1]=self.input.text()
+            text = self.parent.exec_comand_string(self.input.text())
+            self.commandList.addItem(text)
+            self.input.setText("")
+            self.currentcommand = len(self.commands)
+        if event.key() == 16777235:
+            self.currentcommand -=1
+            self.currentcommand = self.currentcommand % len(self.commands)
+            self.input.setText(self.commands[self.currentcommand])
+        if event.key()  == 16777237:
+            self.currentcommand -=1
+            self.currentcommand = self.currentcommand % len(self.commands)
+            self.input.setText(self.commands[self.currentcommand])
+        
 if __name__ == '__main__':
     global world
     app = QApplication(sys.argv)
