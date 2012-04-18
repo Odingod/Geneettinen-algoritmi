@@ -160,7 +160,7 @@ class World(object):
                 self.addCreature(cre)
 
         else:
-            for x in range(10):
+            for x in range((WIDTH * HEIGHT) / 160):
                 if not USE_GRAPHICS:
                     self.addCreature(Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH))
                 else:

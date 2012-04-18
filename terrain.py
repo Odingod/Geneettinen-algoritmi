@@ -17,7 +17,7 @@ def printTerrain(terr):
 
 class NoiseMapGenerator:
     
-    def __init__(self, octaves=3, width=globals.WIDTH, height=globals.HEIGHT, roughness=6.0):
+    def __init__(self, octaves=3, width=globals.WIDTH, height=globals.HEIGHT, roughness=6.0, seeded=globals.SEED):
         self.octaves = octaves
         self.width = width
         self.height = height
@@ -26,7 +26,31 @@ class NoiseMapGenerator:
         self.offsetx = 0
         self.offsety = 0
         self.terrain = [[None for y in xrange(self.height)] for x in xrange(self.width)]
-
+        #primes = self.prime(100000)
+        random.seed(seeded)
+        self.primel = [random.choice([7, 11, 13, 17, 19, 23, 29]), 
+                  random.choice([31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79]),
+                  random.choice([60413, 60427, 60443, 60449, 60457, 60493, 60497, 60509, 60521, 
+                                 60527, 60539, 60589, 60601, 60607, 60611, 60617, 60623, 60631, 
+                                 60637, 60647, 60649, 60659, 60661, 60679, 60689, 60703, 60719, 
+                                 60727, 60733, 60737, 60757, 60761, 60763, 60773, 60779, 60793, 
+                                 60811, 60821, 60859, 60869, 60887, 60889, 60899, 60901, 60913, 
+                                 60917, 60919, 60923, 60937, 60943, 60953, 60961])]
+        #print [p for p in primes if 60400 < p < 61000]
+        
+        
+    '''
+    def prime(self, n):
+            """
+            Generate list of primes.
+            """
+            primes = [2]
+            for m in range(3,n,2):
+                if all(m%p for p in primes):
+                    primes.append(m)
+            return primes
+    '''
+    
     def generate(self):
         for x in xrange(self.width):
             for y in xrange(self.height):
@@ -39,10 +63,10 @@ class NoiseMapGenerator:
                 if i < 20:
                     #Deep Water
                     self.terrain[x][y] = 1
-                elif i < 81:
+                elif i < 71:
                     #Water
                     self.terrain[x][y] = 2
-                elif i < 116:
+                elif i < 106:
                     #Coast
                     self.terrain[x][y] = 3
                 elif i < 156:
@@ -62,9 +86,9 @@ class NoiseMapGenerator:
         '''
         A pseudo-random number generator
         '''
-        n = int(x) + int(y) * 57
-        n=(n << 13) ^ n
-        nn=int((n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff)
+        n = int(x) + int(y) * self.primel[1]
+        n=(n << self.primel[0]) ^ n
+        nn=int((n * (n * n * self.primel[2] + 19990303) + 1376312589) & 0x7fffffff)
         return 1.0 - (nn / 1073741824.0)
     
     def interpolate(self, a, b ,x):
@@ -86,6 +110,12 @@ class NoiseMapGenerator:
         i1 = self.interpolate(s, t, x - flrx)
         i2 = self.interpolate(u, v, x - flrx)
         return self.interpolate(i1, i2, y - flry)
+    
+    def getTerrainData(self):
+        return self.terrain
+
+    def saveMap(self, filename=""):
+        io.arrayToFile(self.terrain, filename)
 
 class Drunkard(object):
     
@@ -207,13 +237,17 @@ class DrunkardTerrainGenerator(object):
         io.arrayToFile(self.terrain, filename)
 
 if __name__ == '__main__':
-    terrainGenerator = DrunkardTerrainGenerator()
-    terrainGenerator.generate()
-    printTerrain(terrainGenerator.terrain)
+    #terrainGenerator = DrunkardTerrainGenerator()
+    #terrainGenerator.generate()
+    #printTerrain(terrainGenerator.terrain)
+    #terrainGenerator.saveMap()
+    
+    #print '\n'
+    irr = 0
+    while irr < 10: 
+        terrainGenerator = NoiseMapGenerator(seeded=random.random())
+        terrainGenerator.generate()
+        terrainGenerator.saveMap()
+        irr+=1
+    #printTerrain(terrainGenerator.terrain)
     terrainGenerator.saveMap()
-    
-    print '\n'
-    
-    terrainGenerator = NoiseMapGenerator()
-    terrainGenerator.generate()
-    printTerrain(terrainGenerator.terrain)

@@ -306,9 +306,11 @@ class Generation(object):
         
         First it creates a list candidates which contains list indices of creatures.
         The more the creature has eaten and visited places the more places it gets on the candidate list.
-        Then new creatures are created by randomly choosing the creatures to combine.         
+        Then new creatures are created by randomly choosing the creatures to combine.
         '''
+        
         candidates = sum([[i] * self.creatures[i].fitness() for i in xrange(len(self.creatures))], []) #sum is used to flatten the list of lists
+        print dict((candidate,candidates.count(candidate)) for candidate in candidates)
         creatures = []
 
         for x in xrange(self.size):
