@@ -89,7 +89,7 @@ class World(object):
             if creature.loc not in self.creatures and (terrainType != 'deep_water' and terrainType != 'mountain'):
                 inserted = True
                 self.creatures[creature.loc] = creature
-            print terrainType != 'deep_water', terrainType != 'mountain', inserted
+
         
     
     def addFood(self, food):

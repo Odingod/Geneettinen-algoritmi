@@ -25,38 +25,38 @@ class NoiseMapGenerator:
         self.roughness = float(roughness)
         self.offsetx = 0
         self.offsety = 0
-        self.terrain = [[None for x in xrange(self.width)] for y in xrange(self.height)]
+        self.terrain = [[None for y in xrange(self.height)] for x in xrange(self.width)]
 
     def generate(self):
-        for y in xrange(self.height):
-            for x in xrange(self.width):
+        for x in xrange(self.width):
+            for y in xrange(self.height):
                 noiseval = 0
                 for a in xrange(self.octaves-1):
                     freq = float(2.0 ** a)
                     ampl = float(self.roughness ** a)                
-                    noiseval += self.perlin_noise((x + self.offsetx) * (freq / self.zoom), ((y + self.offsety)/ (freq * self.zoom)) * ampl)
+                    noiseval += self.perlin_noise((y + self.offsety) * (freq / self.zoom), ((x + self.offsetx)/ (freq * self.zoom)) * ampl)
                 i = int(noiseval * 128 + 128)
                 if i < 20:
                     #Deep Water
-                    self.terrain[y][x] = 1
+                    self.terrain[x][y] = 1
                 elif i < 81:
                     #Water
-                    self.terrain[y][x] = 2
+                    self.terrain[x][y] = 2
                 elif i < 116:
                     #Coast
-                    self.terrain[y][x] = 3
+                    self.terrain[x][y] = 3
                 elif i < 156:
                     #Grass
-                    self.terrain[y][x] = 4
+                    self.terrain[x][y] = 4
                 elif i < 237:
                     #Forest
-                    self.terrain[y][x] = 5
+                    self.terrain[x][y] = 5
                 elif i < 288:
                     #Hill
-                    self.terrain[y][x] = 6
+                    self.terrain[x][y] = 6
                 else:
                     #Mountain
-                    self.terrain[y][x] = 7
+                    self.terrain[x][y] = 7
     
     def makenoise(self, x, y):
         '''
