@@ -111,7 +111,8 @@ class MainWindow(QMainWindow):
         self.normal.triggered.connect(self.normalA)
         self.slow.triggered.connect(self.slowA)
         self.settings.triggered.connect(self.settingsA)
-        self.terrainGenerator = terrain.DrunkardTerrainGenerator(width=WIDTH+1, height=HEIGHT+1)
+        self.terrainGenerator = terrain.NoiseMapGenerator(width=WIDTH+1, height=HEIGHT+1)
+        #self.terrainGenerator = terrain.DrunkardTerrainGenerator(width=WIDTH+1, height=HEIGHT+1)
         
         
         self.world = WorldLabel() if USE_GRAPHICS else World()
@@ -209,7 +210,7 @@ class MainWindow(QMainWindow):
         - If you specify both filename and terrainGenerator, terrain will be loaded
         from file
         """
-        if filename is None and isinstance(terrainGenerator, terrain.DrunkardTerrainGenerator):
+        if filename is None and isinstance(terrainGenerator, terrain.DrunkardTerrainGenerator) or isinstance(terrainGenerator, terrain.NoiseMapGenerator):
             world.makeTerrain(terrainGenerator)
 
         elif isinstance(filename, str):

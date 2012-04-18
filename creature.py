@@ -50,7 +50,7 @@ class Creature(object):
         self.sight = 0
         self.memory = 0
         self.walked = 0
-        self.accessibleTerrain = ['grass']
+        self.accessibleTerrain = ['water', 'grass', 'forest', 'hill']
         if genome is None:
             self.genome = [[(randint(0, len(choices) - 1), randint(0, 15)) for y in xrange(4)] for x in xrange(16)]
         else: self.genome = genome
@@ -145,7 +145,7 @@ class Creature(object):
 
         elif world.getFood(nextLocation) is not None:
             self.sight = sights['VEGETABLE']
-        elif outOfBounds or self.nextTerrainType == 'wall':
+        elif outOfBounds or self.nextTerrainType == 'deep_water' or self.nextTerrainType == 'mountain':
             self.sight = sights['WALL']
         else: self.sight = sights['NOTHING']
     

@@ -85,9 +85,11 @@ class World(object):
             y = random.randint(0, HEIGHT)
             creature.loc = x, y
             terrainType = getAssociatedKey(ID=self.terrain[x][y])
-            if creature.loc not in self.creatures and terrainType == 'grass':
+            #if creature.loc not in self.creatures and terrainType == 'grass':
+            if creature.loc not in self.creatures and (terrainType != 'deep_water' and terrainType != 'mountain'):
                 inserted = True
                 self.creatures[creature.loc] = creature
+            print terrainType != 'deep_water', terrainType != 'mountain', inserted
         
     
     def addFood(self, food):
@@ -109,7 +111,7 @@ class World(object):
             y = random.randint(0, HEIGHT)
             food.loc = x, y
             terrainType = getAssociatedKey(ID=self.terrain[x][y])
-            if food.loc not in self.foods and terrainType != 'wall':
+            if food.loc not in self.foods and (terrainType != 'mountain' and terrainType != 'deep_water'):
                 inserted = True
                 self.foods[food.loc] = food
     
@@ -165,7 +167,7 @@ class World(object):
                     self.addCreature(CreatureLabel(self, (randint(0, WIDTH), randint(0, HEIGHT))))
         
         if food_location == 'random':
-            for x in range(200):
+            for x in range((WIDTH * HEIGHT) / 8):
                 if not USE_GRAPHICS:
                     self.addFood(Food((randint(0, WIDTH), randint(0, HEIGHT))))
                 else:

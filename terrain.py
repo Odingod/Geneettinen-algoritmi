@@ -1,6 +1,8 @@
 import random
 import globals
 import io
+import math
+
 
 X = 0
 Y = 1
@@ -12,6 +14,78 @@ def printTerrain(terr):
             row  += "[" + str(terr[x][y]) + "]"
         print row
         row = ""
+
+class NoiseMapGenerator:
+    
+    def __init__(self, octaves=3, width=globals.WIDTH, height=globals.HEIGHT, roughness=6.0):
+        self.octaves = octaves
+        self.width = width
+        self.height = height
+        self.zoom = 20.0
+        self.roughness = float(roughness)
+        self.offsetx = 0
+        self.offsety = 0
+        self.terrain = [[None for x in xrange(self.width)] for y in xrange(self.height)]
+
+    def generate(self):
+        for y in xrange(self.height):
+            for x in xrange(self.width):
+                noiseval = 0
+                for a in xrange(self.octaves-1):
+                    freq = float(2.0 ** a)
+                    ampl = float(self.roughness ** a)                
+                    noiseval += self.perlin_noise((x + self.offsetx) * (freq / self.zoom), ((y + self.offsety)/ (freq * self.zoom)) * ampl)
+                i = int(noiseval * 128 + 128)
+                if i < 20:
+                    #Deep Water
+                    self.terrain[y][x] = 1
+                elif i < 81:
+                    #Water
+                    self.terrain[y][x] = 2
+                elif i < 116:
+                    #Coast
+                    self.terrain[y][x] = 3
+                elif i < 156:
+                    #Grass
+                    self.terrain[y][x] = 4
+                elif i < 237:
+                    #Forest
+                    self.terrain[y][x] = 5
+                elif i < 288:
+                    #Hill
+                    self.terrain[y][x] = 6
+                else:
+                    #Mountain
+                    self.terrain[y][x] = 7
+    
+    def makenoise(self, x, y):
+        '''
+        A pseudo-random number generator
+        '''
+        n = int(x) + int(y) * 57
+        n=(n << 13) ^ n
+        nn=int((n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff)
+        return 1.0 - (nn / 1073741824.0)
+    
+    def interpolate(self, a, b ,x):
+        ft = x * math.pi
+        f = (1 - math.cos(ft)) * 0.5
+        return a * (1 - f) + b * f
+    
+    def perlin_noise(self, x, y):
+        '''
+        Generates noise based on the position
+        '''
+        flrx = math.floor(x)
+        flry = math.floor(y)
+        s = self.makenoise(flrx, flry)
+        t = self.makenoise(flrx+1, flry)
+        u = self.makenoise(flrx, flry+1)
+        v = self.makenoise(flrx+1, flry+1)
+        
+        i1 = self.interpolate(s, t, x - flrx)
+        i2 = self.interpolate(u, v, x - flrx)
+        return self.interpolate(i1, i2, y - flry)
 
 class Drunkard(object):
     
@@ -137,3 +211,9 @@ if __name__ == '__main__':
     terrainGenerator.generate()
     printTerrain(terrainGenerator.terrain)
     terrainGenerator.saveMap()
+    
+    print '\n'
+    
+    terrainGenerator = NoiseMapGenerator()
+    terrainGenerator.generate()
+    printTerrain(terrainGenerator.terrain)

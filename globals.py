@@ -16,8 +16,15 @@ FOOD_PIC = QImage('food16.png')
 CORPSE_PIC = QImage('pacdead.png')
 
 WALL_PIC = QImage('wall.png')
-GRASS_PIC = QImage('grass.png')
+
+DEEP_WATER_PIC = QImage('deep_water.png')
 WATER_PIC = QImage('water.png')
+COAST_PIC = QImage('coast.png')
+GRASS_PIC = QImage('grass.png')
+FOREST_PIC = QImage('forest.png')
+HILL_PIC = QImage('hill.png')
+MOUNTAIN_PIC = QImage('mountain.png')
+
 
 
 MUTATE = 10 #chance of mutation in ‰
@@ -25,14 +32,27 @@ TERRAINTYPES = {
     #format: 
     #'type' : (ID, (red, green, blue))
     'wall': (0, (0, 0, 0)),
-    'grass': (1, (0, 255, 0)),
-    'water': (2, (0, 0, 255))
+    'deep_water': (1, (0, 0, 105)),
+    'water': (2, (0, 0, 255)),
+    'coast': (3, (255, 255, 0)),
+    'grass': (4, (0, 255, 0)),
+    'forest': (5, (0, 105, 0)),
+    'hill': (6, (135, 65, 15)),
+    'mountain': (7, (150, 150, 150)),
+    
+    
+    
  }
 
 TERRAINTYPEIMAGE = {
     'wall': WALL_PIC,
+    'deep_water': DEEP_WATER_PIC,
+    'water': WATER_PIC,
+    'coast': COAST_PIC,
     'grass': GRASS_PIC,
-    'water': WATER_PIC
+    'forest': FOREST_PIC,
+    'hill': HILL_PIC,
+    'mountain': MOUNTAIN_PIC
 }
 
 
