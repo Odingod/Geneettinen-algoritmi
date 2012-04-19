@@ -44,7 +44,7 @@ class Creature(object):
     Then it does the action based on the tuples first member and sets it's own memory to the second member.
     
     '''
-    def __init__(self, loc, heading, genome=None):
+    def __init__(self, loc, heading, genome=None,test=False):
         self.loc = loc
         self.heading = heading
         self.sight = 0
@@ -59,6 +59,9 @@ class Creature(object):
         self.calories = 500
         self.dead = False
         self.miles = []
+        if test:
+			global USE_GRAPHICS 
+			USE_GRAPHICS = False
 
         #io.creaturesToXML([self])
 

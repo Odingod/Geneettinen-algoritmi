@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 import random
-from creature import *#Creature, CreatureLabel, Generation
+from creature import * #Creature, CreatureLabel, Generation
 from food import Food, FoodLabel
 import terrain
 import io
 from globals import *
+import creature
 
 class World(object):
     '''
     Object that contains all the creatures of the generation and food
     '''
-    def __init__(self):
+    def __init__(self, test=False):
         # self.terrainGenerator = None
         self.terrain = []
         self.tiles = []
@@ -20,6 +21,9 @@ class World(object):
         self.maximum = 0
         self.total = 0
         self.average = 0.0
+        if test:
+			global USE_GRAPHICS 
+			USE_GRAPHICS = False
 
     def makeTerrain(self, terrainGenerator):
         """
@@ -29,7 +33,6 @@ class World(object):
         - `height`:
         - `drunkards`:
         """
-
         terrainGenerator.generate()
         self.terrain = terrainGenerator.terrain
         self.drawTerrain()
@@ -84,7 +87,7 @@ class World(object):
             x = random.randint(0, WIDTH)
             y = random.randint(0, HEIGHT)
             creature.loc = x, y
-            terrainType = getAssociatedKey(ID=self.terrain[x][y])
+            terrainType = getAssociatedKey(ID=self.terrain[x-1][y-1])
             #if creature.loc not in self.creatures and terrainType == 'grass':
             if creature.loc not in self.creatures and (terrainType != 'deep_water' and terrainType != 'mountain'):
                 inserted = True
@@ -110,7 +113,7 @@ class World(object):
             x = random.randint(0, WIDTH)
             y = random.randint(0, HEIGHT)
             food.loc = x, y
-            terrainType = getAssociatedKey(ID=self.terrain[x][y])
+            terrainType = getAssociatedKey(ID=self.terrain[x-1][y-1])
             if food.loc not in self.foods and (terrainType != 'mountain' and terrainType != 'deep_water'):
                 inserted = True
                 self.foods[food.loc] = food
@@ -162,7 +165,7 @@ class World(object):
         else:
             for x in range((WIDTH * HEIGHT) / 160):
                 if not USE_GRAPHICS:
-                    self.addCreature(Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH))
+                    self.addCreature(creature.Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH,None, True))
                 else:
                     self.addCreature(CreatureLabel(self, (randint(0, WIDTH), randint(0, HEIGHT))))
         
