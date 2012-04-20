@@ -229,8 +229,13 @@ class MainWindow(QMainWindow):
     def AddFood(self):
 
         location = self.mousePos
-        world.addFood(Food(location) if not USE_GRAPHICS else FoodLabel(self, location))
-        print "food added"
+        print location
+        if not world.USE_GRAPHICS:
+            world.addFood(Food(location))
+        else:
+            world.addFood(FoodLabel(world, location), rando=False)
+
+
         
     def whatsHere(self):
 
@@ -308,7 +313,7 @@ class MainWindow(QMainWindow):
 
             for food in world.foods.values():
                 pass
-                #food.animate()
+                # food.animate()
 
             if USE_GRAPHICS:
                 world.update()
@@ -366,24 +371,24 @@ class MainWindow(QMainWindow):
                     heading = (0, -1)
                 elif  Args[2] == "EAST":
                     heading  = (1, 0)
-                elif Args[2] =="SOUTH":
+                elif Args[2] == "SOUTH":
                     heading = (0, 1)
                 elif Args[2] == "WEST":
                     heading = (-1, 0)
                 else:
                     return "Unknown parameters in command" +string
                 
-                if len(Args)==3:
+                if len(Args) == 3:
 
                     creature = Creature((int(Args[0]), int(Args[1]), heading))
                     world.addCreature(creature)
-                elif len(Args)==4:
+                elif len(Args) == 4:
                     creature = Creature((int(Args[0]), int(Args[1]), heading), Args[4])
                     world.addCreature(creature)
             except:
-                return "Unknown parameters in command" +string
+                return "Unknown parameters in command" + string
         else:
-            return "Unknown command "+command
+            return "Unknown command " + command
     
     
     

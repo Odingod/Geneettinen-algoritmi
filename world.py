@@ -100,32 +100,36 @@ class World(object):
 
             tries += 1
     
-    def addFood(self, food):
+    def addFood(self, food, rando=True):
         '''
         Adds food if there's no other creature at the same spot, else tries to put food somewhere else
         '''
-
-        # try:
-        #     self.foods[food.loc]
-        # except KeyError:
-        #     self.foods[food.loc] = food
-        #     return
-        # food.loc = (randint(0, WIDTH), randint(0, HEIGHT))
-        # self.addFood(food)
-
+        
         inserted = False
         tries = 0
         while not inserted and tries < 10:
-            x = random.randint(0, WIDTH)
-            y = random.randint(0, HEIGHT)
-            food.loc = x, y
+            x = 0
+            y = 0
+            if rando:
+                x = random.randint(0, WIDTH)
+                y = random.randint(0, HEIGHT)
+                food.loc = x, y
+
+            else:
+                x = food.loc[0]
+                y = food.loc[1]
+            
             terrainType = getAssociatedKey(ID=self.terrain[x-1][y-1])
             if food.loc not in self.foods and (terrainType != 'mountain' and terrainType != 'deep_water'):
                 inserted = True
                 self.foods[food.loc] = food
+                if self.USE_GRAPHICS:
+                    food.move(x * GRIDSIZE, y * GRIDSIZE)
+
 
         tries += 1
-    
+        rando = True
+        
     def removeFood(self, food):
         del self.foods[food.loc]
     
