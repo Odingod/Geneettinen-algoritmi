@@ -7,8 +7,8 @@ NORTH = (0, -1)
 EAST = (1, 0)
 SOUTH = (0, 1)
 WEST = (-1, 0)
-WIDTH = 80
-HEIGHT = 60
+WIDTH = 60
+HEIGHT = 40
 GRIDSIZE = 16
 global USE_GRAPHICS
 USE_GRAPHICS = True

@@ -72,6 +72,8 @@ class MainWindow(QMainWindow):
         self.running = True
         self.highscore = 0
         QMainWindow.__init__(self)     
+
+        self.mousePos = (0, 0)
         
         self.menubar = QMenuBar(self)
         self.setMenuBar(self.menubar)
@@ -167,7 +169,15 @@ class MainWindow(QMainWindow):
 
 
     def contextMenuEvent(self, event):
+        pos = QCursor.pos()
+        pos = self.mapFromGlobal(pos)
+        loc = pos.toTuple()
         
+        h = self.size().height()
+        w = self.size().width()
+        location = (loc[0] / GRIDSIZE, loc[1] / GRIDSIZE - 2)
+        self.mousePos = location
+
         menu = QMenu(self) 
         
         self.DockAct = QAction("&Open cmd", self, triggered = self.showdoc)
@@ -217,27 +227,14 @@ class MainWindow(QMainWindow):
             world.loadTerrain(filename)
 
     def AddFood(self):
-        
-        #Toi sijainnin haku kusee viel vahasen.
-        pos = QCursor.pos()
-        pos =self.mapFromGlobal(pos)
-        loc = pos.toTuple()
-        
-        h = self.size().height()
-        w = self.size().width()
-        location = int(loc[0] * HEIGHT / h) - 3, int(loc[1] * WIDTH / w - 3)
+
+        location = self.mousePos
         world.addFood(Food(location) if not USE_GRAPHICS else FoodLabel(self, location))
         print "food added"
         
     def whatsHere(self):
-        pos = QCursor.pos()
-        pos =self.mapFromGlobal(pos)
-        loc = pos.toTuple()
-        
-        h = self.size().height()
-        w = self.size().width()
-        location = int(loc[0] * HEIGHT / h) - 3, int(loc[1] * WIDTH / w - 3)
-        
+
+        location = self.mousePos
         if world.getFood(location):
             print "food"
         elif world.getCreature(location):

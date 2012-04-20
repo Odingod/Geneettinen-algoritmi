@@ -83,7 +83,8 @@ class World(object):
         # creature.loc = (randint(0, WIDTH), randint(0, HEIGHT))
         # self.addCreature(creature)
         inserted = False
-        while not inserted:
+        tries = 0
+        while not inserted and tries < 10:
             x = random.randint(0, WIDTH)
             y = random.randint(0, HEIGHT)
             creature.loc = x, y
@@ -93,7 +94,7 @@ class World(object):
                 inserted = True
                 self.creatures[creature.loc] = creature
 
-        
+            tries += 1
     
     def addFood(self, food):
         '''
@@ -109,7 +110,8 @@ class World(object):
         # self.addFood(food)
 
         inserted = False
-        while not inserted:
+        tries = 0
+        while not inserted and tries < 10:
             x = random.randint(0, WIDTH)
             y = random.randint(0, HEIGHT)
             food.loc = x, y
@@ -117,6 +119,8 @@ class World(object):
             if food.loc not in self.foods and (terrainType != 'mountain' and terrainType != 'deep_water'):
                 inserted = True
                 self.foods[food.loc] = food
+
+        tries += 1
     
     def removeFood(self, food):
         del self.foods[food.loc]
