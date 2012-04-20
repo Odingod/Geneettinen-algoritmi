@@ -60,6 +60,8 @@ TERRAINTYPEIMAGE = {
 IDINDEX = 0
 RGBINDEX = 1
 
+
+
 def getAssociatedRGB(terrainKey="", terrainID=-1):
     """
     Arguments:

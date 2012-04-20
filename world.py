@@ -11,7 +11,7 @@ class World(object):
     '''
     Object that contains all the creatures of the generation and food
     '''
-    def __init__(self, test=False):
+    def __init__(self, wUSE_GRAPHICS=True, test=False):
         # self.terrainGenerator = None
         self.terrain = []
         self.tiles = []
@@ -21,6 +21,7 @@ class World(object):
         self.maximum = 0
         self.total = 0
         self.average = 0.0
+        self.USE_GRAPHICS = wUSE_GRAPHICS
         if test:
 			global USE_GRAPHICS 
 			USE_GRAPHICS = False
@@ -58,10 +59,11 @@ class World(object):
             for y in xrange(len(self.terrain[0])):
                 loc = (x, y)
                 key = getAssociatedKey(ID=self.getTerrainID(loc))
-                if not USE_GRAPHICS:
+                if not self.USE_GRAPHICS:
                     self.addTile(Tile(key, loc))
                 else:
                     self.addTile(TileLabel(key, loc, self))
+
 
 
     def addTile(self, tile):
@@ -88,6 +90,8 @@ class World(object):
             x = random.randint(0, WIDTH)
             y = random.randint(0, HEIGHT)
             creature.loc = x, y
+            # if not USE_GRAPHICS:
+            #     print "x:", x, ", y:", y
             terrainType = getAssociatedKey(ID=self.terrain[x-1][y-1])
             #if creature.loc not in self.creatures and terrainType == 'grass':
             if creature.loc not in self.creatures and (terrainType != 'deep_water' and terrainType != 'mountain'):
@@ -168,14 +172,14 @@ class World(object):
 
         else:
             for x in range((WIDTH * HEIGHT) / 160):
-                if not USE_GRAPHICS:
-                    self.addCreature(creature.Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH,None, True))
+                if not self.USE_GRAPHICS:
+                    self.addCreature(creature.Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH, None, True))
                 else:
                     self.addCreature(CreatureLabel(self, (randint(0, WIDTH), randint(0, HEIGHT))))
         
         if food_location == 'random':
             for x in range((WIDTH * HEIGHT) / 8):
-                if not USE_GRAPHICS:
+                if not self.USE_GRAPHICS:
                     self.addFood(Food((randint(0, WIDTH), randint(0, HEIGHT))))
                 else:
                     self.addFood(FoodLabel(self, (randint(0, WIDTH), randint(0, HEIGHT))))
@@ -183,13 +187,13 @@ class World(object):
         elif food_location == 'middle':
             for i in range(15, 26):
                 for j in range(15, 26):
-                    self.addFood((Food(i, j) if not USE_GRAPHICS else FoodLabel(self, (i, j))))      
+                    self.addFood((Food(i, j) if not self.USE_GRAPHICS else FoodLabel(self, (i, j))))      
 
         elif food_location == 'corner':
             for i in range(WIDTH):
                 for j in range(HEIGHT):
                     if (i < 5 or i > WIDTH - 6) and (j < 5 or j > HEIGHT - 6):
-                        self.addFood((Food(i, j) if not USE_GRAPHICS else FoodLabel(self, (i, j))))  
+                        self.addFood((Food(i, j) if not self.USE_GRAPHICS else FoodLabel(self, (i, j))))  
 
 
 class Statistics():

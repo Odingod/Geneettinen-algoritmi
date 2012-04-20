@@ -259,10 +259,14 @@ class MainWindow(QMainWindow):
         global USE_GRAPHICS
         USE_GRAPHICS = False
         print 'changed to no graph'
+        tempTerrain = world.terrain
         self.world.setParent(None)
         self.world = World()
         global world
         world = self.world
+        world.USE_GRAPHICS = False
+        world.terrain = tempTerrain
+        self.genret = WorldRetriever(world)
         self.timer.setInterval(0)
         
     def fastA(self):
@@ -286,10 +290,16 @@ class MainWindow(QMainWindow):
     def changeToGraphics(self):
         global USE_GRAPHICS
         USE_GRAPHICS = True
-        self.world=WorldLabel()
-        self.setCentralWidget(self.world)
+        tempTerrain = world.terrain
+        self.world = WorldLabel()
+        
         global world
         world = self.world
+        world.terrain = tempTerrain
+        world.USE_GRAPHICS = True
+        self.setCentralWidget(world)
+        world.drawTerrain()
+        self.genret = WorldRetriever(world)
     
     def doTurn(self):
         if self.day < 200:

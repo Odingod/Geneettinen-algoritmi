@@ -60,8 +60,8 @@ class Creature(object):
         self.dead = False
         self.miles = []
         if test:
-			global USE_GRAPHICS 
-			USE_GRAPHICS = False
+			# global USE_GRAPHICS 
+			world.USE_GRAPHICS = False
 
         #io.creaturesToXML([self])
 
@@ -242,7 +242,7 @@ class Creature(object):
                 else:
                     newGenome[x][y] = self.genome[x][y]
 
-        if USE_GRAPHICS:
+        if world.USE_GRAPHICS:
             return CreatureLabel(world, (randint(0, WIDTH), randint(0, HEIGHT)), newGenome)
         else:
             return Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH, newGenome)
@@ -294,7 +294,7 @@ class Generation(object):
             self.creatures = []
 
             for x in xrange(self.size):
-                if USE_GRAPHICS:
+                if world.USE_GRAPHICS:
                     self.creatures.append(CreatureLabel(world, (randint(0, WIDTH), randint(0, HEIGHT))))
 
                 else: 
@@ -312,8 +312,9 @@ class Generation(object):
         Then new creatures are created by randomly choosing the creatures to combine.
         '''
         
-        candidates = sum([[i] * self.creatures[i].fitness() for i in xrange(len(self.creatures))], []) #sum is used to flatten the list of lists
-        print dict((candidate,candidates.count(candidate)) for candidate in candidates)
+        candidates = sum([[i] * self.creatures[i].fitness() for i in xrange(len(self.creatures))], [])
+        # sum is used to flatten the list of lists
+        print dict((candidate, candidates.count(candidate)) for candidate in candidates)
         creatures = []
 
         for x in xrange(self.size):
