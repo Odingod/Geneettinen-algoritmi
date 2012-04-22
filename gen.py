@@ -102,6 +102,7 @@ class MainWindow(QMainWindow):
         self.fast = self.editMenu.addAction('Fast')
         self.normal = self.editMenu.addAction('Normal')
         self.slow = self.editMenu.addAction('Slow')
+        self.pause = self.editMenu.addAction('Pause')
         self.editMenu.addSeparator()
         self.settings = self.editMenu.addAction('Settings')
         
@@ -116,6 +117,7 @@ class MainWindow(QMainWindow):
         self.fast.triggered.connect(self.fastA)
         self.normal.triggered.connect(self.normalA)
         self.slow.triggered.connect(self.slowA)
+        self.pause.triggered.connect(self.pauseA)
         self.settings.triggered.connect(self.settingsA)
         self.terrainGenerator = terrain.NoiseMapGenerator(width=WIDTH+1, height=HEIGHT+1)
         #self.terrainGenerator = terrain.DrunkardTerrainGenerator(width=WIDTH+1, height=HEIGHT+1)
@@ -126,6 +128,7 @@ class MainWindow(QMainWindow):
             self.setCentralWidget(self.world)
         self.adjustSize()        
         global world
+        self.paused=False
         world = self.world
         self.genret = WorldRetriever(world)
         self.makeNewTerrain(terrainGenerator=self.terrainGenerator)
@@ -203,6 +206,11 @@ class MainWindow(QMainWindow):
         menu = QMenu(self) 
         
         self.DockAct = QAction("&Open cmd", self, triggered = self.showdoc)
+        
+        self.PauseAct = QAction("&Pause",self,
+                statusTip="Pause algorithm",
+                triggered=self.pauseA)
+        
         self.SlowAct = QAction("&Slow", self,
                 statusTip="Set mode for Slow",
                 triggered=self.slowA)
@@ -231,7 +239,7 @@ class MainWindow(QMainWindow):
 
         
         SpeedMenu = menu.addMenu("&Mode")
-        
+        SpeedMenu.addAction(self.PauseAct)
         SpeedMenu.addAction(self.SlowAct)    
         SpeedMenu.addAction(self.NormalAct)
         SpeedMenu.addAction(self.FastAct)
@@ -341,6 +349,7 @@ class MainWindow(QMainWindow):
                 print "Creature(s) saved to", filename
     
     def fastestA(self):
+        self.paused=False
         global USE_GRAPHICS
         USE_GRAPHICS = False
         print 'changed to no graph'
@@ -355,19 +364,25 @@ class MainWindow(QMainWindow):
         self.timer.setInterval(0)
         
     def fastA(self):
+        self.paused=False
         if not USE_GRAPHICS:
             self.changeToGraphics()
         self.timer.setInterval(0)
     
     def normalA(self):
+        self.paused=False
         if not USE_GRAPHICS:
             self.changeToGraphics()
         self.timer.setInterval(100)
     
     def slowA(self):
+        self.paused=False
         if not USE_GRAPHICS:
             self.changeToGraphics()
         self.timer.setInterval(500)
+    
+    def pauseA(self):
+        self.paused=True
     
     def settingsA(self):
         print 'Not implemented yet'
@@ -387,6 +402,8 @@ class MainWindow(QMainWindow):
         self.genret = WorldRetriever(world)
     
     def doTurn(self):
+        if self.paused:
+            return
         if self.day < 200:
             for cre in world.creatures.values():
                 cre.doTurn()
