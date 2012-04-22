@@ -2,7 +2,7 @@
 from PySide.QtCore import *
 from PySide.QtGui import *
 
-SEED = '42'
+SEED = '145'
 NORTH = (0, -1)
 EAST = (1, 0)
 SOUTH = (0, 1)

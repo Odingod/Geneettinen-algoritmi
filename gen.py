@@ -5,44 +5,44 @@ Pohjakoodia geneettisen algoritmin projektiin
 
 Kehitysideoita:
 pienempiä:
--tallennus/lataus (yksittäisen otuksen tai koko sukupolven)
--gui-härpäkkeitä (asetuksia, tilastoja ym.)
--asetuksia
-    -otusten määrä ja tyyppi
-    -ruoan määrä
-    -kartan koko
-    -vuoden pituus
-    -genomin koko
-    -algoritmi
--haju (otus 'haistaa' onko lähellä ruokaa)
--erilaisia ruoan asetteluita ja asetuksia 
-    -määrä
-    -onko ruoan määrä aina sama (eli ilmestyykö uutta kun vanhaa syödään)
-    -ruokaa vain tietyillä alueilla
-    -ruoka on ryppäissä
--vesi,seinät,
--kartan generointia, karttaeditori tai kartan tuonti kuvasta 
--kartassa useampia tasoja
--lentävät otukset
--uivat otukset(joita rannoilla kävelevät syövät)
--vesi(erikseen uinti ja kävely eteenpäin)
--erilaiset ruoat(hidastaa, pysäyttää, sekoittaa, ym.)
--toisia otuksia syövät otukset (oma Generation)
--samassa maailmassa kaksi eri sukupolvea jotka kehittyvät eri algoritmeilla
--eri algoritmeja
+- tallennus/lataus (yksittäisen otuksen tai koko sukupolven)
+- gui-härpäkkeitä (asetuksia, tilastoja ym.)
+- asetuksia
+    - otusten määrä ja tyyppi
+    - ruoan määrä
+    - kartan koko
+    - vuoden pituus
+    - genomin koko
+    - algoritmi
+- haju (otus 'haistaa' onko lähellä ruokaa)
+- erilaisia ruoan asetteluita ja asetuksia 
+    - määrä
+    - onko ruoan määrä aina sama (eli ilmestyykö uutta kun vanhaa syödään)
+    - ruokaa vain tietyillä alueilla
+    - ruoka on ryppäissä
+- DONE vesi,seinät,
+- DONE kartan generointia, karttaeditori tai kartan tuonti kuvasta
+- kartassa useampia tasoja
+- lentävät otukset
+- uivat otukset(joita rannoilla kävelevät syövät)
+- DONE vesi(erikseen uinti ja kävely eteenpäin)
+- erilaiset ruoat(hidastaa, pysäyttää, sekoittaa, ym.)
+- toisia otuksia syövät otukset (oma Generation)
+- samassa maailmassa kaksi eri sukupolvea jotka kehittyvät eri algoritmeilla
+- eri algoritmeja
 
 isompia:
--parempi algoritmi
--pieni skriptikieli jolla voisi kirjoitella omia otuksia
--sen sijaan että optimoitaisiin yksittäisen otuksen fitnessiä, vertailtaisiin sukupolvia ja valittaisiin jatkoon se joka söi yhteensä eniten
--voisi yrittää saada olioita tekemään jotain yksinkertaisia tehtäviä esim. kuljeta esineitä 'pesään', ole tietyllä alueella. Näissä pitäisi keksiä miten oliot pisteytetään.
--otusten välinen kommunikointi(lähetä oma tila)
--hiiriohjaus
-    -ruokaa tähän 
-    -näytä olion tiedot
-    -siirrä oliota
-    -zoomaus
-    -ym.
+- parempi algoritmi
+- pieni skriptikieli jolla voisi kirjoitella omia otuksia
+- sen sijaan että optimoitaisiin yksittäisen otuksen fitnessiä, vertailtaisiin sukupolvia ja valittaisiin jatkoon se joka söi yhteensä eniten
+- voisi yrittää saada olioita tekemään jotain yksinkertaisia tehtäviä esim. kuljeta esineitä 'pesään', ole tietyllä alueella. Näissä pitäisi keksiä miten oliot pisteytetään.
+- otusten välinen kommunikointi(lähetä oma tila)
+- hiiriohjaus
+    - DONE ruokaa tähän 
+    - näytä olion tiedot
+    - siirrä oliota
+    - zoomaus
+    - ym.
 
    
 '''
@@ -51,6 +51,7 @@ Created on Jun 16, 2011
 
 @author: anttir
 '''
+import sys, time
 
 from PySide.QtCore import *
 from PySide.QtGui import *
@@ -63,9 +64,10 @@ from world import *
 from food import *
 from globals import *
 import terrain
+import io
 #import creature
 
-import sys, time
+
 
 class MainWindow(QMainWindow):   
     def __init__(self):
@@ -141,14 +143,26 @@ class MainWindow(QMainWindow):
                 triggered= self.whatsHere)
                 
     def showstatisticsA(self, Statistics=None):
-        QMessageBox.information(self,"Statistics",
+        QMessageBox.information(self, "Statistics",
                                 self.getStatisticString(),
                                 QMessageBox.Ok)
         
     def exportA(self,statistics=None):
-        filename = QFileDialog.getSaveFileName(self, "Save as .csv",
-                                               filter = ("CSV (*.csv)"))
-        if filename[0]:
+        dialog = QFileDialog(self, caption="Save as csv")
+        dialog.setFileMode(QFileDialog.AnyFile)
+        dialog.setNameFilter("CSV (*.csv)")
+        dialog.setViewMode(QFileDialog.Detail)
+        filename = ""
+
+        if dialog.exec_():
+            filename = dialog.selectedFiles()
+        
+        # filename = QFileDialog.getSaveFileName(self, "Save as .csv",
+        #                                        ".",
+        #                                        filter = ("CSV (*.csv)"))
+        if filename == "" or filename is None:
+            pass
+        elif filename[0]:
             with open(filename[0], 'wb') as f:
                 w = csv.writer(f, delimiter=';', quoting=csv.QUOTE_NONE)
                 w.writerow(["Total Eaten:", "Total Walked:"])
@@ -255,10 +269,38 @@ class MainWindow(QMainWindow):
         self.closeA()
 
     def loadA(self):
-        print 'Not implemented'
-    
+        dialog = QFileDialog(self, caption="Load creatures")
+        dialog.setFileMode(QFileDialog.ExistingFile)
+        dialog.setNameFilter("XML (*.xml)")
+        dialog.setViewMode(QFileDialog.Detail)
+        filename = ""
+
+        if dialog.exec_():
+            filename = dialog.selectedFiles()
+
+        if filename == "" or filename is None:
+            pass
+        elif filename[0]:
+            with open(filename[0], 'r') as f:
+                io.xmlToCreatures(filename[0], world)
+                print "new creatures loaded"
+                
+                
     def saveA(self):
-        print 'Not implemented'
+        dialog = QFileDialog(self, caption="Save creatures")
+        dialog.setFileMode(QFileDialog.AnyFile)
+        dialog.setNameFilter("XML (*.xml)")
+        dialog.setViewMode(QFileDialog.Detail)
+        filename = ""
+
+        if dialog.exec_():
+            filename = dialog.selectedFiles()
+
+        if filename == "" or filename is None:
+            pass
+        elif filename[0]:
+            with open(filename[0], 'w') as f:
+                io.creaturesToXML(world.creatures, filename[0])
     
     def fastestA(self):
         global USE_GRAPHICS

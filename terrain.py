@@ -17,7 +17,7 @@ def printTerrain(terr):
 
 class NoiseMapGenerator:
     
-    def __init__(self, octaves=3, width=globals.WIDTH, height=globals.HEIGHT, roughness=6.0, seeded=globals.SEED):
+    def __init__(self, octaves=3, width=globals.WIDTH+1, height=globals.HEIGHT+1, roughness=6.0, seeded=globals.SEED):
         self.octaves = octaves
         self.width = width
         self.height = height
