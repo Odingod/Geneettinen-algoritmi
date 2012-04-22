@@ -136,11 +136,19 @@ class MainWindow(QMainWindow):
         self.timer.start(1)
         self.AddFoodAct = QAction("&Add food",self,
                                   statusTip="Add food to location",
-                                  triggered = self.AddFood)
+                                  triggered=self.AddFood)
         self.whatsHereAct = QAction(
                 "&Whats Here?", self,
                 statusTip="Click to see whats under cursor!", 
-                triggered= self.whatsHere)
+                triggered=self.whatsHere)
+
+        self.saveCreatureToFileAct = QAction("&Save creature", self,
+                                             statusTip="Save creature to modify it",
+                                             triggered=self.saveCreatureToFile)
+
+        self.releaseCreatureAct = QAction("&Release creature", self,
+                                          statusTip="Release creature",
+                                          triggered=self.releaseCreature)
                 
     def showstatisticsA(self, Statistics=None):
         QMessageBox.information(self, "Statistics",
@@ -212,6 +220,15 @@ class MainWindow(QMainWindow):
                 statusTip="Set mode for Fastest",
                 triggered=self.fastestA)
            
+
+        self.saveCreatureToFileAct = QAction("&Save creature", self,
+                                             statusTip="Save creature to modify it",
+                                             triggered=self.saveCreatureToFile)
+
+        self.releaseCreatureAct = QAction("&Release creature", self,
+                                          statusTip="Release creature",
+                                          triggered=self.releaseCreature)
+
         
         SpeedMenu = menu.addMenu("&Mode")
         
@@ -222,6 +239,8 @@ class MainWindow(QMainWindow):
         menu.addAction(self.AddFoodAct)
         menu.addAction(self.whatsHereAct)
         menu.addAction(self.DockAct)
+        menu.addAction(self.saveCreatureToFileAct)
+        menu.addAction(self.releaseCreatureAct)
         
         menu.exec_(event.globalPos())
 
@@ -260,6 +279,18 @@ class MainWindow(QMainWindow):
             print "creature"
         print location
         
+    def saveCreatureToFile(self):
+        location = self.mousePos
+        creature = world.getCreature(location)
+        if creature:
+            self.saveA({location: creature})
+
+        else:
+            print "Missed me HAHAHA >:D"
+
+    def releaseCreature(self):
+        location = self.mousePos
+        self.loadA(clearFirst=False, location=location)
 
     def closeA(self):
         self.running = False
@@ -268,13 +299,12 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         self.closeA()
 
-    def loadA(self):
+    def loadA(self, clearFirst=True, location=None):
         dialog = QFileDialog(self, caption="Load creatures")
         dialog.setFileMode(QFileDialog.ExistingFile)
         dialog.setNameFilter("XML (*.xml)")
         dialog.setViewMode(QFileDialog.Detail)
         filename = ""
-
         if dialog.exec_():
             filename = dialog.selectedFiles()
 
@@ -282,11 +312,14 @@ class MainWindow(QMainWindow):
             pass
         elif filename[0]:
             with open(filename[0], 'r') as f:
-                io.xmlToCreatures(filename[0], world)
+                if clearFirst:
+                    world.removeCreatures()
+
+                io.xmlToCreatures(filename[0], world, location)
                 print "new creatures loaded"
                 
                 
-    def saveA(self):
+    def saveA(self, creaturesToSave=None):
         dialog = QFileDialog(self, caption="Save creatures")
         dialog.setFileMode(QFileDialog.AnyFile)
         dialog.setNameFilter("XML (*.xml)")
@@ -300,7 +333,12 @@ class MainWindow(QMainWindow):
             pass
         elif filename[0]:
             with open(filename[0], 'w') as f:
-                io.creaturesToXML(world.creatures, filename[0])
+                if creaturesToSave is None:
+                    io.creaturesToXML(world.creatures, filename[0])
+                else:
+                    io.creaturesToXML(creaturesToSave, filename[0])
+
+                print "Creature(s) saved to", filename
     
     def fastestA(self):
         global USE_GRAPHICS

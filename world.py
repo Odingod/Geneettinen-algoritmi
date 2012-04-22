@@ -93,7 +93,6 @@ class World(object):
                 x = random.randint(0, WIDTH)
                 y = random.randint(0, HEIGHT)
             else:
-                print creature.loc
                 x = creature.loc[0]
                 y = creature.loc[1]
             creature.loc = x, y

@@ -2,7 +2,7 @@
 import datetime
 import sys
 from xml.etree import ElementTree
-from xml.etree.ElementTree import ElementTree, Element, SubElement, Comment
+from xml.etree.ElementTree import Element, SubElement, Comment
 from xml.dom import minidom
 
 import png
@@ -177,6 +177,15 @@ def creaturesToXML(creatures, filename=""):
 
         memory = SubElement(cElement, "memory")
         memory.text = str(cre.memory)
+
+        calories = SubElement(cElement, "calories")
+        calories.text = str(cre.calories)
+        
+        walked = SubElement(cElement, "walked")
+        walked.text = str(cre.walked)
+
+        eaten = SubElement(cElement, "eaten")
+        eaten.text = str(cre.eaten)
         
         accessible = SubElement(cElement, "accessibleTerrain")
         for tType in cre.accessibleTerrain:
@@ -193,14 +202,6 @@ def creaturesToXML(creatures, filename=""):
                 somethingIDontKnow = SubElement(pElement, "something")
                 somethingIDontKnow.text = str(pair[1])
                 
-        calories = SubElement(cElement, "calories")
-        calories.text = str(cre.calories)
-        
-        walked = SubElement(cElement, "walked")
-        walked.text = str(cre.walked)
-
-        eaten = SubElement(cElement, "eaten")
-        eaten.text = str(cre.eaten)
         
     raw = ElementTree.tostring(root)
     parsed = minidom.parseString(raw)
@@ -216,7 +217,7 @@ def creaturesToXML(creatures, filename=""):
     f.close()
 
 
-def xmlToCreatures(filename, world):
+def xmlToCreatures(filename, world, location=None):
     """
     
     Arguments:
@@ -225,24 +226,28 @@ def xmlToCreatures(filename, world):
     """
     creatures = {}
 
-    tree = ElementTree()
+    tree = ElementTree.ElementTree()
     tree.parse(filename)
 
     root = tree.getroot()
 
     creatureElems = root.findall("creature")
 
-    world.removeCreatures()
     # e as prefix means element in XML
 
     for cre in creatureElems:
-        eLoc = cre.find("location")
-        eLocX = eLoc.find("x")
-        eLocY = eLoc.find("y")
-        xLoc = int(eLocX.text)
-        yLoc = int(eLocY.text)
+        loc = None
+        if location is None:
+            eLoc = cre.find("location")
+            eLocX = eLoc.find("x")
+            eLocY = eLoc.find("y")
+            xLoc = int(eLocX.text)
+            yLoc = int(eLocY.text)
         
-        loc = (xLoc, yLoc)
+            loc = (xLoc, yLoc)
+
+        else:
+            loc = location
 
         eHeading = cre.find("heading")
         eHeadingX = eHeading.find("x")

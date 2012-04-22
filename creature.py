@@ -314,7 +314,7 @@ class Generation(object):
         
         candidates = sum([[i] * self.creatures[i].fitness() for i in xrange(len(self.creatures))], [])
         # sum is used to flatten the list of lists
-        print dict((candidate, candidates.count(candidate)) for candidate in candidates)
+        # print dict((candidate, candidates.count(candidate)) for candidate in candidates)
         creatures = []
 
         for x in xrange(self.size):
