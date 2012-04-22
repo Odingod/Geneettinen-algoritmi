@@ -66,9 +66,9 @@ class StatisticsWindow(QWidget):
             with open(fname, 'wb') as f:
                 w = csv.writer(f, delimiter=';', quoting=csv.QUOTE_NONE)
                 w.writerow(["Total Eaten:", "Total Walked:"])
-                for i in range(len(self.parent.world.statEaten)):
-                    w.writerow([self.parent.world.statEaten[i],
-                                self.parent.world.statWalked[i]])
+                for i in range(len(self.parent.statEaten)):
+                    w.writerow([self.parent.statEaten[i],
+                                self.parent.statWalked[i]])
         else:
             try:
                 self.canvas.print_figure( unicode(fname) )
@@ -82,7 +82,7 @@ class StatisticsWindow(QWidget):
     def dataChanged(self):
         
         #x-axes data
-        x=range(1,len(self.parent.world.statEaten)+1)
+        x=range(1,len(self.parent.statEaten)+1)
         self.axes[0].clear()
         self.axes[1].clear()
         for label in self.axes[0].get_xticklabels():
@@ -94,8 +94,8 @@ class StatisticsWindow(QWidget):
         for ax in self.axes:
             ax.grid(True)
             
-        l1=self.axes[0].plot(x,self.parent.world.statEaten,'b-',label='current')[0]
-        l2=self.axes[0].plot(x,self.parent.world.statAverageEaten,'r--',label='average')[0]
+        l1=self.axes[0].plot(x,self.parent.statEaten,'b-',label='current')[0]
+        l2=self.axes[0].plot(x,self.parent.statAverageEaten,'r--',label='average')[0]
         leg=self.axes[0].legend(bbox_to_anchor=(0.,1.02,1.,.102),loc=3,ncol=2,mode="expand",borderaxespad=0)
         self.axes[0].fill_between(l1.get_xdata(),
                                   l1.get_ydata(),
@@ -112,8 +112,8 @@ class StatisticsWindow(QWidget):
                                   alpha=0.2,
                                   interpolate=True)        
 
-        l1,l2=self.axes[1].plot(x,self.parent.world.statWalked,'b-',
-                          x,self.parent.world.statAverageWalked,'r--')
+        l1,l2=self.axes[1].plot(x,self.parent.statWalked,'b-',
+                          x,self.parent.statAverageWalked,'r--')
                 
         self.axes[1].fill_between(l1.get_xdata(),
                                   l1.get_ydata(),

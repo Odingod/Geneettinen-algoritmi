@@ -152,6 +152,17 @@ class MainWindow(QMainWindow):
         self.releaseCreatureAct = QAction("&Release creature", self,
                                           statusTip="Release creature",
                                           triggered=self.releaseCreature)
+                                          
+                                          
+        #stats
+        self.statEaten = []
+        self.statWalked = []
+        self.statAverageEaten = []
+        self.statAverageWalked = []
+        self.maximum = 0
+        self.totalEaten = 0
+        self.totalWalked= 0
+        self.average=0.0
                 
     def showStatisticsA(self, Statistics=None):
         if not self.statWindow:
@@ -170,10 +181,10 @@ class MainWindow(QMainWindow):
     def getStatisticString(self):
         string = ""
         i = 1
-        for i in range(len(world.statEaten)):
+        for i in range(len(self.statEaten)):
             string += "year: " + str(i+1) + "\n"
-            string += "Total eaten : " + str(world.statEaten[i]) + "\n" 
-            string += "Total walked :" + str(world.statWalked[i])
+            string += "Total eaten : " + str(self.statEaten[i]) + "\n" 
+            string += "Total walked :" + str(self.statWalked[i])
             string += "\n"
             string += "\n"
         return string
@@ -387,22 +398,22 @@ class MainWindow(QMainWindow):
             if USE_GRAPHICS:
                 world.update()
                 self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2:03d}  Maximum: {3:03d} Average: {4:03d}'\
-                                        .format(self.year, self.day, self.highscore, world.maximum, int(world.average)))
+                                        .format(self.year, self.day, self.highscore, self.maximum, int(self.average)))
             #realtime stats
             #self.highscore=self.gen.totalEaten()
             self.day += 1
         else:
-            world.statEaten.append(self.gen.totalEaten())
-            world.statWalked.append(self.gen.totalWalked())
-            world.totalEaten += world.statEaten[-1]
-            world.totalWalked+= world.statWalked[-1]
-            if self.gen.totalEaten() > world.maximum: 
-            	world.maximum = self.gen.totalEaten()
+            self.statEaten.append(self.gen.totalEaten())
+            self.statWalked.append(self.gen.totalWalked())
+            self.totalEaten += self.statEaten[-1]
+            self.totalWalked+= self.statWalked[-1]
+            if self.gen.totalEaten() > self.maximum: 
+            	self.maximum = self.gen.totalEaten()
 
-            world.statAverageEaten.append(world.totalEaten / self.year)
-            world.statAverageWalked.append(world.totalWalked / self.year)
-            world.average=world.statAverageEaten[-1]
-            self.highscore = world.statEaten[-1]
+            self.statAverageEaten.append(self.totalEaten / self.year)
+            self.statAverageWalked.append(self.totalWalked / self.year)
+            self.average=self.statAverageEaten[-1]
+            self.highscore = self.statEaten[-1]
             self.gen = self.gen.nextGeneration()
             self.world.removeEverything()
             self.world.populate(self.gen)

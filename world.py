@@ -17,14 +17,6 @@ class World(object):
         self.tiles = []
         self.creatures = {}
         self.foods = {}
-        self.statEaten = []
-        self.statWalked = []
-        self.statAverageEaten = []
-        self.statAverageWalked = []
-        self.maximum = 0
-        self.totalEaten = 0
-        self.totalWalked= 0
-        self.average=0.0
         self.USE_GRAPHICS = wUSE_GRAPHICS
         if test:
 			global USE_GRAPHICS 
