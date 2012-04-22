@@ -17,10 +17,14 @@ class World(object):
         self.tiles = []
         self.creatures = {}
         self.foods = {}
-        self.statistics = []
+        self.statEaten = []
+        self.statWalked = []
+        self.statAverageEaten = []
+        self.statAverageWalked = []
         self.maximum = 0
-        self.total = 0
-        self.average = 0.0
+        self.totalEaten = 0
+        self.totalWalked= 0
+        self.average=0.0
         self.USE_GRAPHICS = wUSE_GRAPHICS
         if test:
 			global USE_GRAPHICS 
@@ -212,13 +216,7 @@ class World(object):
             for i in range(WIDTH):
                 for j in range(HEIGHT):
                     if (i < 5 or i > WIDTH - 6) and (j < 5 or j > HEIGHT - 6):
-                        self.addFood((Food(i, j) if not self.USE_GRAPHICS else FoodLabel(self, (i, j))))  
-
-
-class Statistics():
-    def __init__(self, totaleaten, totalwalked):
-        self.totaleaten = totaleaten
-        self.totalwalked = totalwalked
+                        self.addFood((Food(i, j) if not self.USE_GRAPHICS else FoodLabel(self, (i, j))))
     
 class Tile(object):
     def __init__(self, key, loc):

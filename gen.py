@@ -65,6 +65,7 @@ from food import *
 from globals import *
 import terrain
 import io
+from statisticsWindow import *
 #import creature
 
 
@@ -73,7 +74,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         self.running = True
         self.highscore = 0
-        QMainWindow.__init__(self)     
+        QMainWindow.__init__(self)   
+        self.setWindowTitle('Geneettinen algoritmi')  
 
         self.mousePos = (0, 0)
         
@@ -104,11 +106,11 @@ class MainWindow(QMainWindow):
         self.settings = self.editMenu.addAction('Settings')
         
         self.statisticMenu = self.menuBar().addMenu('&Statistics')
-        self.showstatistics = self.statisticMenu.addAction('Show statistics')
-        self.exportstatistics = self.statisticMenu.addAction('Export statistics')
+        self.showStatistics = self.statisticMenu.addAction('Show statistics')
+        self.exportStatistics = self.statisticMenu.addAction('Export statistics')
         
-        self.showstatistics.triggered.connect(self.showstatisticsA)
-        self.exportstatistics.triggered.connect(self.exportA)
+        self.showStatistics.triggered.connect(self.showStatisticsA)
+        self.exportStatistics.triggered.connect(self.exportStatisticsA)
         
         self.fastest.triggered.connect(self.fastestA)
         self.fast.triggered.connect(self.fastA)
@@ -134,6 +136,7 @@ class MainWindow(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.doTurn)
         self.timer.start(1)
+        self.statWindow=None
         self.AddFoodAct = QAction("&Add food",self,
                                   statusTip="Add food to location",
                                   triggered=self.AddFood)
@@ -150,43 +153,29 @@ class MainWindow(QMainWindow):
                                           statusTip="Release creature",
                                           triggered=self.releaseCreature)
                 
-    def showstatisticsA(self, Statistics=None):
-        QMessageBox.information(self, "Statistics",
-                                self.getStatisticString(),
-                                QMessageBox.Ok)
+    def showStatisticsA(self, Statistics=None):
+        if not self.statWindow:
+            self.statWindow=StatisticsWindow(self)
+            self.statWindow.show()
+            
+    def closeStatWindow(self):
+        self.statWindow=None
         
-    def exportA(self,statistics=None):
-        dialog = QFileDialog(self, caption="Save as csv")
-        dialog.setFileMode(QFileDialog.AnyFile)
-        dialog.setNameFilter("CSV (*.csv)")
-        dialog.setViewMode(QFileDialog.Detail)
-        filename = ""
-
-        if dialog.exec_():
-            filename = dialog.selectedFiles()
-        
-        # filename = QFileDialog.getSaveFileName(self, "Save as .csv",
-        #                                        ".",
-        #                                        filter = ("CSV (*.csv)"))
-        if filename == "" or filename is None:
-            pass
-        elif filename[0]:
-            with open(filename[0], 'wb') as f:
-                w = csv.writer(f, delimiter=';', quoting=csv.QUOTE_NONE)
-                w.writerow(["Total Eaten:", "Total Walked:"])
-                for stat in world.statistics:
-                    w.writerow([stat.totaleaten, stat.totalwalked])
+    def exportStatisticsA(self,statistics=None):
+        if self.statWindow:
+            self.statWindow.exportStats()
+        else:
+            StatisticsWindow(self).exportStats()
 		    
     def getStatisticString(self):
         string = ""
         i = 1
-        for stat in world.statistics:
-            string += "year: " + str(i) + "\n"
-            string += "Total eaten : " + str(stat.totaleaten) + "\n" 
-            string += "Total walked :" + str(stat.totalwalked)
+        for i in range(len(world.statEaten)):
+            string += "year: " + str(i+1) + "\n"
+            string += "Total eaten : " + str(world.statEaten[i]) + "\n" 
+            string += "Total walked :" + str(world.statWalked[i])
             string += "\n"
             string += "\n"
-            i += 1
         return string
 
 
@@ -397,28 +386,32 @@ class MainWindow(QMainWindow):
 
             if USE_GRAPHICS:
                 world.update()
-                self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2}  Maximum: {3:03d} Average: {4:03d}'\
+                self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2:03d}  Maximum: {3:03d} Average: {4:03d}'\
                                         .format(self.year, self.day, self.highscore, world.maximum, int(world.average)))
-
+            #realtime stats
+            #self.highscore=self.gen.totalEaten()
             self.day += 1
-
         else:
-            stat = Statistics(self.gen.totalEaten(), self.gen.totalWalked())
-            world.total += self.gen.totalEaten()
-
+            world.statEaten.append(self.gen.totalEaten())
+            world.statWalked.append(self.gen.totalWalked())
+            world.totalEaten += world.statEaten[-1]
+            world.totalWalked+= world.statWalked[-1]
             if self.gen.totalEaten() > world.maximum: 
             	world.maximum = self.gen.totalEaten()
 
-            world.average = world.total / self.year
-            world.statistics.append(stat)
-            self.highscore = self.gen.totalEaten()
+            world.statAverageEaten.append(world.totalEaten / self.year)
+            world.statAverageWalked.append(world.totalWalked / self.year)
+            world.average=world.statAverageEaten[-1]
+            self.highscore = world.statEaten[-1]
             self.gen = self.gen.nextGeneration()
             self.world.removeEverything()
             self.world.populate(self.gen)
             self.year += 1
             self.day = 1
-    
-    
+            if self.statWindow:
+                self.statWindow.dataChanged()
+                self.statWindow.draw()
+           
     def exec_comand_string(self, string):
         if len(string) <= 0:
                 return ""
