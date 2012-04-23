@@ -40,11 +40,11 @@ class StatisticsWindow(QWidget):
         self.close()
         
     def exportStats(self):
+        dialog = QFileDialog(self, "Choose a filename and type to save to, suffix declares type","./stats.csv")
         filetypes = self.canvas.get_supported_filetypes_grouped().items()
         filetypes.append(('Spreadsheet',['csv']))
         filetypes.sort()
         default_filetype = 'csv'
-        defaultname = "./stats.csv"
         filters = []
         selectedFilter = None
         for name, exts in filetypes:
@@ -54,14 +54,20 @@ class StatisticsWindow(QWidget):
                 selectedFilter = filter
             filters.append(filter)
         filters = ';;'.join(filters)
-        fname = QFileDialog.getSaveFileName(
-            self, "Choose a filename and type to save to, suffix declares type", defaultname, filters, selectedFilter)
+        dialog.setFileMode(QFileDialog.AnyFile)
+        dialog.setNameFilter(filters)
+        dialog.selectNameFilter(selectedFilter)
+        dialog.setViewMode(QFileDialog.Detail)
+
+        if not dialog.exec_():
+            return
+        fname = dialog.selectedFiles()
         if not fname[0]:
             return
         fname=fname[0]
         if not '.' in fname:
             fname+='.csv'
-
+        self.dataChanged()
         if '.csv' in fname:
             with open(fname, 'wb') as f:
                 w = csv.writer(f, delimiter=';', quoting=csv.QUOTE_NONE)
