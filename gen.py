@@ -325,9 +325,11 @@ class MainWindow(QMainWindow):
                 
                 
     def saveA(self, creaturesToSave=None):
-        dialog = QFileDialog(self, caption="Save creatures")
+        dialog = QFileDialog(self, "Save creatures","creatures.xml")
         dialog.setFileMode(QFileDialog.AnyFile)
+        dialog.setAcceptMode(QFileDialog.AcceptSave)
         dialog.setNameFilter("XML (*.xml)")
+        dialog.setDefaultSuffix(u'xml')
         dialog.setViewMode(QFileDialog.Detail)
         filename = ""
 
