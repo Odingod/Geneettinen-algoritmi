@@ -84,12 +84,13 @@ class FoodGeneration(object):
     
                     else: 
                         self.foods[loc]=Food(loc, self.parent, False)
+            i=0
             while i < self.size:
                 x=randint(0, WIDTH-1)
                 y=randint(0, HEIGHT-1)
                 loc=x,y
                 terrainType=getAssociatedKey(ID=self.parent.terrain[x][y])
-                if terrainType!='wall' and not self.foods[loc].isAlive():
+                if terrainType!='mountain' and terrainType!='deep_water' and not self.foods[loc].isAlive():
                     self.foods[loc].resurrect()
                     i+=1     
         else: 
@@ -102,6 +103,7 @@ class FoodGeneration(object):
         
         for loc, food in self.foods.iteritems():
             n=0
+            
             for neighbour in food.neighbours:
                 if neighbour.isAlive():
                     n+=1
@@ -110,24 +112,18 @@ class FoodGeneration(object):
                     dead.append(loc)
                 elif n > 3:
                     dead.append(loc)
+                else:
+                    resurrected.append(loc)
             else:
                 if n==3:
                     resurrected.append(loc)
-              
+            
         for loc in dead:
             self.foods[loc].die()
             
         for food in resurrected:
             self.foods[loc].resurrect()
-        
-        alive=0
-        dead=0
-        for food in self.foods.values():
-            if food.isAlive():
-                alive+=1
-            else:
-                dead+=1
-        print str(alive) + '/' + str(dead)   
+              
         return self
         
     def totalAlive(self):

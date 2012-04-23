@@ -8,7 +8,7 @@ from xml.dom import minidom
 import png
 
 import globals
-
+import creature
 
 def transpose(arry):
     """
@@ -157,7 +157,7 @@ def creaturesToXML(creatures, filename=""):
     """
 
     root = Element("creatures")
-    for cre in creatures:
+    for cre in creatures.values():
         cElement = SubElement(root, "creature")
         
         loc = SubElement(cElement, "location")
@@ -172,8 +172,20 @@ def creaturesToXML(creatures, filename=""):
         hy = SubElement(heading, "y")
         hy.text = str(cre.heading[1])
 
+        sight = SubElement(cElement, "sight")
+        sight.text = str(cre.sight)
+
         memory = SubElement(cElement, "memory")
         memory.text = str(cre.memory)
+
+        calories = SubElement(cElement, "calories")
+        calories.text = str(cre.calories)
+        
+        walked = SubElement(cElement, "walked")
+        walked.text = str(cre.walked)
+
+        eaten = SubElement(cElement, "eaten")
+        eaten.text = str(cre.eaten)
         
         accessible = SubElement(cElement, "accessibleTerrain")
         for tType in cre.accessibleTerrain:
@@ -190,14 +202,6 @@ def creaturesToXML(creatures, filename=""):
                 somethingIDontKnow = SubElement(pElement, "something")
                 somethingIDontKnow.text = str(pair[1])
                 
-        calories = SubElement(cElement, "calories")
-        calories.text = str(cre.calories)
-        
-        walked = SubElement(cElement, "walked")
-        walked.text = str(cre.walked)
-
-        eaten = SubElement(cElement, "eaten")
-        eaten.text = str(cre.eaten)
         
     raw = ElementTree.tostring(root)
     parsed = minidom.parseString(raw)
@@ -211,6 +215,92 @@ def creaturesToXML(creatures, filename=""):
     f = open(filename, 'w')
     f.write(parsed)
     f.close()
+
+
+def xmlToCreatures(filename, world, location=None):
+    """
+    
+    Arguments:
+    - `filename`: Name of the XML that contains creatures
+    Returns dictionary of creatures
+    """
+    creatures = {}
+
+    tree = ElementTree.ElementTree()
+    tree.parse(filename)
+
+    root = tree.getroot()
+
+    creatureElems = root.findall("creature")
+
+    # e as prefix means element in XML
+
+    for cre in creatureElems:
+        loc = None
+        if location is None:
+            eLoc = cre.find("location")
+            eLocX = eLoc.find("x")
+            eLocY = eLoc.find("y")
+            xLoc = int(eLocX.text)
+            yLoc = int(eLocY.text)
+        
+            loc = (xLoc, yLoc)
+
+        else:
+            loc = location
+
+        eHeading = cre.find("heading")
+        eHeadingX = eHeading.find("x")
+        eHeadingY = eHeading.find("y")
+        xHeading = int(eHeadingX.text)
+        yHeading = int(eHeadingY.text)
+
+        heading = (xHeading, yHeading)
+
+        eSight = cre.find("sight")
+        sight = int(eSight.text)
+
+        eMem = cre.find("memory")
+        mem = int(eMem.text)
+
+        eTerrTypes = cre.find("accessibleTerrain")
+        terrainTypes = []
+        for eT in eTerrTypes:
+            terrainTypes.append(eT.text)
+
+        eGenome = cre.find("genome")
+        eGenomeMemories = eGenome.findall("memory")
+        genome = []
+        for eGMem in eGenomeMemories:
+            ePairs = eGMem.findall("pair")
+            memory = []
+            for eP in ePairs:
+                action = int(eP.find("action").text)
+                something = int(eP.find("something").text)
+                memory.append((action, something))
+
+            genome.append(memory)
+
+        eCalories = cre.find("calories")
+        calories = int(eCalories.text)
+
+        eWalked = cre.find("walked")
+        walked = int(eWalked.text)
+
+        eEaten = cre.find("eaten")
+        eaten = int(eEaten.text)
+
+        creatureObj = creature.CreatureLabel(world, loc, genome)
+        creatureObj.sight = sight
+        creatureObj.memory = mem
+        creatureObj.walked = walked
+        creatureObj.accessibleTerrain = terrainTypes
+        creatureObj.eaten = eaten
+        creatureObj.calories = calories
+
+        world.addCreature(creatureObj, rando=False)
+        
+    return creatures
 
 
 if __name__ == '__main__':

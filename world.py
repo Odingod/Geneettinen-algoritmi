@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
 import random
-from creature import *#Creature, CreatureLabel, Generation
+from creature import * #Creature, CreatureLabel, Generation
 from food import Food, FoodLabel
 import terrain
 import io
 from globals import *
+import creature
 
 class World(object):
     '''
     Object that contains all the creatures of the generation and food
     '''
-    def __init__(self):
+    def __init__(self, wUSE_GRAPHICS=True, test=False):
         # self.terrainGenerator = None
         self.terrain = []
         self.tiles = []
         self.creatures = {}
         self.foods = {}
-        self.statistics = []
-        self.maximum = 0
-        self.total = 0
-        self.average = 0.0
+        self.USE_GRAPHICS = wUSE_GRAPHICS
+        if test:
+			global USE_GRAPHICS 
+			USE_GRAPHICS = False
 
     def makeTerrain(self, terrainGenerator):
         """
@@ -29,7 +30,6 @@ class World(object):
         - `height`:
         - `drunkards`:
         """
-
         terrainGenerator.generate()
         self.terrain = terrainGenerator.terrain
         self.drawTerrain()
@@ -55,16 +55,17 @@ class World(object):
             for y in xrange(len(self.terrain[0])):
                 loc = (x, y)
                 key = getAssociatedKey(ID=self.getTerrainID(loc))
-                if not USE_GRAPHICS:
+                if not self.USE_GRAPHICS:
                     self.addTile(Tile(key, loc))
                 else:
                     self.addTile(TileLabel(key, loc, self))
 
 
+
     def addTile(self, tile):
         self.tiles.append(tile)
         
-    def addCreature(self, creature):
+    def addCreature(self, creature, rando=True):
         '''
         Adds creature if there's no other creature at the same spot, else tries to put creature somewhere else
         '''
@@ -80,17 +81,31 @@ class World(object):
         # creature.loc = (randint(0, WIDTH), randint(0, HEIGHT))
         # self.addCreature(creature)
         inserted = False
-        while not inserted:
-            x = random.randint(0, WIDTH)
-            y = random.randint(0, HEIGHT)
+        tries = 0
+        while not inserted and tries < 10:
+            x = 0
+            y = 0
+            if rando:
+                x = random.randint(0, WIDTH)
+                y = random.randint(0, HEIGHT)
+            else:
+                x = creature.loc[0]
+                y = creature.loc[1]
             creature.loc = x, y
-            terrainType = getAssociatedKey(ID=self.terrain[x][y])
-            if creature.loc not in self.creatures and terrainType == 'grass':
+            # if not USE_GRAPHICS:
+            #     print "x:", x, ", y:", y
+            terrainType = getAssociatedKey(ID=self.terrain[x-1][y-1])
+            #if creature.loc not in self.creatures and terrainType == 'grass':
+            if creature.loc not in self.creatures and (terrainType != 'deep_water' and terrainType != 'mountain'):
                 inserted = True
                 self.creatures[creature.loc] = creature
-        
+                if self.USE_GRAPHICS:
+                    creature.move(x * GRIDSIZE, y * GRIDSIZE)
+                
+            tries += 1
+            rando = True
     
-    def addFood(self, food):
+    def addFood(self, food, rando=True):
         '''
         Adds food if there's no other creature at the same spot, else tries to put food somewhere else
         '''
@@ -104,21 +119,31 @@ class World(object):
         # self.addFood(food)
         if not GAMEOFLIFE:
             inserted = False
-            while not inserted:
+            tries = 0
+            while not inserted and tries < 10:
                 x = random.randint(0, WIDTH)
                 y = random.randint(0, HEIGHT)
                 food.loc =x,y
                 terrainType = getAssociatedKey(ID=self.terrain[x][y])
-                if food.loc not in self.foods and terrainType != 'wall':
+                if food.loc not in self.foods and (terrainType != 'mountain' and terrainType != 'deep_water'):
                     inserted = True
                     self.foods[food.loc] = food
+                    if self.USE_GRAPHICS:
+                        food.move(x * GRIDSIZE, y * GRIDSIZE)
+                tries+=1
+        
+        
         else:
             x=food.loc[0]
             y=food.loc[1]
             terrainType = getAssociatedKey(ID=self.terrain[x][y])
-            if food.loc not in self.foods and terrainType != 'wall':
-                self.foods[food.loc]=food
-        
+            if food.loc not in self.foods and (terrainType != 'mountain' and terrainType != 'deep_water'):
+                inserted = True
+                self.foods[food.loc] = food
+                if self.USE_GRAPHICS:
+                    food.move(x * GRIDSIZE, y * GRIDSIZE)
+
+
         
     def removeFood(self, food):
         del self.foods[food.loc]
@@ -151,26 +176,33 @@ class World(object):
             return self.terrain[loc[0]][loc[1]]
         except KeyError:
             return None
-        
-    def removeEverything(self):
+
+    def removeCreatures(self):
         for creature in self.creatures.values():
             self.removeCreature(creature)
+
+    def removeFoods(self):
         for food in self.foods.values():
             self.removeFood(food)
-        
-            
+       
+    def removeEverything(self):
+        self.removeCreatures()
+        self.removeFoods()
+         
     def populate(self,generation=None, foodgeneration=None):
+
         if generation is not None:
             for cre in generation.creatures:
                 self.addCreature(cre)
 
         else:
-            for x in range(10):
-                if not USE_GRAPHICS:
-                    self.addCreature(Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH))
+            for x in range((WIDTH * HEIGHT) / 160):
+                if not self.USE_GRAPHICS:
+                    self.addCreature(creature.Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH, self, None, True))
                 else:
                     self.addCreature(CreatureLabel(self, (randint(0, WIDTH), randint(0, HEIGHT))))
         
+
         if not GAMEOFLIFE or foodgeneration==None:
             for x in range(200):
                 if not USE_GRAPHICS:
@@ -183,12 +215,34 @@ class World(object):
                 self.addFood(food)
                 
 
+
+    
+                     
+    def changeToWorldLabel(self,parent):
+        world = WorldLabel(parent)
+        parent.setCentralWidget(world)
+        world.terrain = self.terrain
+        world.tiles = self.tiles
+        world.drawTerrain()
+        for food in self.foods:
+            world.addFood(FoodLabel(world, self.foods[food].loc))
+        world.updateFoods()
+        for cre in self.creatures:
+            creature=CreatureLabel(world, self.creatures[cre].loc, self.creatures[cre].genome)
+            creature.eaten = self.creatures[cre].eaten
+            creature.calories = self.creatures[cre].calories
+            creature.dead = self.creatures[cre].dead
+            creature.miles= self.creatures[cre].miles
+            world.addCreature(creature) 
+        return world
+            
+            
 class Statistics():
     def __init__(self, totaleaten, totalwalked, totalalive=None):
         self.totaleaten = totaleaten
         self.totalwalked = totalwalked
         self.totalalive=totalalive
-    
+        
 class Tile(object):
     def __init__(self, key, loc):
         self.key = key
@@ -204,6 +258,7 @@ class TileLabel(QLabel, Tile):
         self.originalPic = QPixmap.fromImage(TERRAINTYPEIMAGE[key])
         self.setPixmap(self.originalPic)
         self.setAttribute(Qt.WA_DeleteOnClose)
+        self.move(loc[0] * GRIDSIZE, loc[1] * GRIDSIZE)
 
 class WorldLabel(QWidget, World):
     def __init__(self, parent=None):        
@@ -225,8 +280,8 @@ class WorldLabel(QWidget, World):
         return QSize(GRIDSIZE * (WIDTH + 1), GRIDSIZE * (HEIGHT + 1))
     
     def update(self):
-        for tile in self.tiles:
-            tile.move(tile.loc[0] * GRIDSIZE, tile.loc[1] * GRIDSIZE)
+        # for tile in self.tiles:
+        #     tile.move(tile.loc[0] * GRIDSIZE, tile.loc[1] * GRIDSIZE)
         for loc, cre in self.creatures.iteritems():
             cre.move(loc[0] * GRIDSIZE, loc[1] * GRIDSIZE)
     
@@ -251,4 +306,19 @@ class WorldLabel(QWidget, World):
         super(WorldLabel, self).populate(generation, foodgeneration)
         self.updateFoods()
         self.update()
+        
+    def changeToWorld(self):
+        world = World(wUSE_GRAPHICS=False)
+        world.terrain = self.terrain
+        world.tiles = self.tiles
+        for cre in self.creatures:
+            creature=Creature(self.creatures[cre].loc, self.creatures[cre].heading, world, self.creatures[cre].genome)
+            creature.eaten = self.creatures[cre].eaten
+            creature.calories = self.creatures[cre].calories
+            creature.dead = self.creatures[cre].dead
+            creature.miles= self.creatures[cre].miles
+            world.addCreature(creature)
+        for food in self.foods:
+            world.addFood(Food(self.foods[food].loc))
+        return world
         
