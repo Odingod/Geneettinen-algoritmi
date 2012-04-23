@@ -279,11 +279,13 @@ class MainWindow(QMainWindow):
 
         location = self.mousePos
         if self.world.getFood(location):
-            print "food"
+            obj = mapObject(Food, self)
         elif self.world.getCreature(location):
-            print "creature"
-        print location
-        
+            obj = mapObject(Creature, self)
+        else:
+            msgBox = QMessageBox()
+            msgBox.setText("Nothing special here!")
+            msgBox.exec_()
     def saveCreatureToFile(self):
         location = self.mousePos
         creature = self.world.getCreature(location)
@@ -556,6 +558,27 @@ class Cmd(QWidget):
             self.currentcommand -=1
             self.currentcommand = self.currentcommand % len(self.commands)
             self.input.setText(self.commands[self.currentcommand])
+class mapObject(QWidget):
+    def __init__(self, type, parent=None):
+        super(mapObject, self).__init__(parent)
+        super(mapObject, self).setWindowFlags(Qt.Window)
+        self.parent = parent
+        
+        self.lbl = QLabel()
+        self.label = QLabel()
+        if type == Creature:
+            self.lbl.setPixmap(QPixmap.fromImage(CREATURE_PIC[3]))
+            self.label.setText("Its a creature")
+        if type == Food:
+            self.lbl.setPixmap(QPixmap.fromImage(FOOD_PIC))
+            self.label.setText("Its food")
+        layout = QVBoxLayout()
+        layout.addWidget(self.lbl)
+        layout.addWidget(self.label)
+        self.setLayout(layout)
+        self.adjustSize()
+        self.show()
+    
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
