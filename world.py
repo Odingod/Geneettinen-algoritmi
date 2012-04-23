@@ -102,17 +102,24 @@ class World(object):
         #     return
         # food.loc = (randint(0, WIDTH), randint(0, HEIGHT))
         # self.addFood(food)
-
-        inserted = False
-        while not inserted:
-            x = random.randint(0, WIDTH)
-            y = random.randint(0, HEIGHT)
-            food.loc = x, y
+        if not GAMEOFLIFE:
+            inserted = False
+            while not inserted:
+                x = random.randint(0, WIDTH)
+                y = random.randint(0, HEIGHT)
+                food.loc =x,y
+                terrainType = getAssociatedKey(ID=self.terrain[x][y])
+                if food.loc not in self.foods and terrainType != 'wall':
+                    inserted = True
+                    self.foods[food.loc] = food
+        else:
+            x=food.loc[0]
+            y=food.loc[1]
             terrainType = getAssociatedKey(ID=self.terrain[x][y])
             if food.loc not in self.foods and terrainType != 'wall':
-                inserted = True
-                self.foods[food.loc] = food
-    
+                self.foods[food.loc]=food
+        
+        
     def removeFood(self, food):
         del self.foods[food.loc]
     
@@ -148,11 +155,11 @@ class World(object):
     def removeEverything(self):
         for creature in self.creatures.values():
             self.removeCreature(creature)
-
         for food in self.foods.values():
             self.removeFood(food)
         
-    def populate(self,generation=None, food_location='random'):
+            
+    def populate(self,generation=None, foodgeneration=None):
         if generation is not None:
             for cre in generation.creatures:
                 self.addCreature(cre)
@@ -164,29 +171,23 @@ class World(object):
                 else:
                     self.addCreature(CreatureLabel(self, (randint(0, WIDTH), randint(0, HEIGHT))))
         
-        if food_location == 'random':
+        if not GAMEOFLIFE or foodgeneration==None:
             for x in range(200):
                 if not USE_GRAPHICS:
                     self.addFood(Food((randint(0, WIDTH), randint(0, HEIGHT))))
                 else:
                     self.addFood(FoodLabel(self, (randint(0, WIDTH), randint(0, HEIGHT))))
-
-        elif food_location == 'middle':
-            for i in range(15, 26):
-                for j in range(15, 26):
-                    self.addFood((Food(i, j) if not USE_GRAPHICS else FoodLabel(self, (i, j))))      
-
-        elif food_location == 'corner':
-            for i in range(WIDTH):
-                for j in range(HEIGHT):
-                    if (i < 5 or i > WIDTH - 6) and (j < 5 or j > HEIGHT - 6):
-                        self.addFood((Food(i, j) if not USE_GRAPHICS else FoodLabel(self, (i, j))))  
-
+                    
+        else:
+            for food in foodgeneration.foods.values():
+                self.addFood(food)
+                
 
 class Statistics():
-    def __init__(self, totaleaten, totalwalked):
+    def __init__(self, totaleaten, totalwalked, totalalive=None):
         self.totaleaten = totaleaten
         self.totalwalked = totalwalked
+        self.totalalive=totalalive
     
 class Tile(object):
     def __init__(self, key, loc):
@@ -230,9 +231,13 @@ class WorldLabel(QWidget, World):
             cre.move(loc[0] * GRIDSIZE, loc[1] * GRIDSIZE)
     
     def updateFoods(self):
-        for loc, food in self.foods.iteritems():
-            food.move(loc[0] * GRIDSIZE, loc[1] * GRIDSIZE)
-
+        if GAMEOFLIFE:
+            for loc, food in self.foods.iteritems():
+                if food.isAlive():
+                    food.move(loc[0] * GRIDSIZE, loc[1] * GRIDSIZE)
+        else:
+            for loc, food in self.foods.iteritems():
+                food.move(loc[0] * GRIDSIZE, loc[1] * GRIDSIZE)
     
     def removeFood(self, food):
         food.setParent(None)
@@ -242,8 +247,8 @@ class WorldLabel(QWidget, World):
         creature.setParent(None)
         super(WorldLabel, self).removeCreature(creature)
     
-    def populate(self,generation=None):
-        super(WorldLabel, self).populate(generation)
+    def populate(self,generation=None, foodgeneration=None):
+        super(WorldLabel, self).populate(generation, foodgeneration)
         self.updateFoods()
         self.update()
         

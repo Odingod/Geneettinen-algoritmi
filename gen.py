@@ -123,7 +123,11 @@ class MainWindow(QMainWindow):
         self.genret = WorldRetriever(world)
         self.makeNewTerrain(terrainGenerator=self.terrainGenerator)
         self.gen = Generation(10)
-        self.world.populate(self.gen)
+        if GAMEOFLIFE:
+            self.foodgen=FoodGeneration(200, self.world)
+            self.world.populate(self.gen, self.foodgen)
+        else:
+            self.world.populate(self.gen)
         self.year = 1
         self.day = 1
         self.timer = QTimer(self)
@@ -159,6 +163,8 @@ class MainWindow(QMainWindow):
             string += "year: " + str(i) + "\n"
             string += "Total eaten : " + str(stat.totaleaten) + "\n" 
             string += "Total walked :" + str(stat.totalwalked)
+            if GAMEOFLIFE:
+                string+= "\n" + "Food alive: " + str(stat.totalalive)
             string += "\n"
             string += "\n"
             i += 1
@@ -310,7 +316,10 @@ class MainWindow(QMainWindow):
             self.day += 1
 
         else:
-            stat = Statistics(self.gen.totalEaten(), self.gen.totalWalked())
+            if GAMEOFLIFE:
+                stat = Statistics(self.gen.totalEaten(), self.gen.totalWalked(), self.foodgen.totalAlive())
+            else:
+                stat = Statistics(self.gen.totalEaten(), self.gen.totalWalked())
             world.total += self.gen.totalEaten()
 
             if self.gen.totalEaten() > world.maximum: 
@@ -319,9 +328,14 @@ class MainWindow(QMainWindow):
             world.average = world.total / self.year
             world.statistics.append(stat)
             self.highscore = self.gen.totalEaten()
-            self.gen = self.gen.nextGeneration()
             self.world.removeEverything()
-            self.world.populate(self.gen)
+            self.gen = self.gen.nextGeneration()
+            if GAMEOFLIFE:
+                self.foodgen=self.foodgen.nextFoodGeneration()
+                self.world.populate(self.gen, self.foodgen)
+                
+            else:
+                self.world.populate(self.gen)
             self.year += 1
             self.day = 1
     
