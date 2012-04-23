@@ -58,6 +58,7 @@ class StatisticsWindow(QWidget):
         dialog.setNameFilter(filters)
         dialog.selectNameFilter(selectedFilter)
         dialog.setViewMode(QFileDialog.Detail)
+        dialog.setAcceptMode(QFileDialog.AcceptSave)
 
         if not dialog.exec_():
             return
