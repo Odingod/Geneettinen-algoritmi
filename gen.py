@@ -411,7 +411,7 @@ class MainWindow(QMainWindow):
                 self.world.update()
                 #realtime stats
                 self.highscore=self.gen.totalEaten()
-            self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2:03d}  Maximum: {3:03d} Average: {4:03d}'\
+                self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2:03d}  Maximum: {3:03d} Average: {4:03d}'\
                                         .format(self.year, self.day, self.highscore, self.maximum, int(self.average)))
 
             self.day += 1
@@ -432,6 +432,8 @@ class MainWindow(QMainWindow):
             self.world.populate(self.gen)
             self.year += 1
             self.day = 1
+            self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2:03d}  Maximum: {3:03d} Average: {4:03d}'\
+                                        .format(self.year, self.day, self.highscore, self.maximum, int(self.average)))
             if self.statWindow:
                 self.statWindow.dataChanged()
                 self.statWindow.draw()
