@@ -91,9 +91,15 @@ class Creature(object):
             world.updateLocation(self, newloc)
 
         if world.getFood(newloc) is not None:
-            world.removeFood(world.getFood(newloc))
-            self.eaten += 1
-            self.calories += 50
+            if GAMEOFLIFE:
+                if world.getFood(newloc).isAlive():
+                    world.removeFood(world.getFood(newloc))
+                    self.eaten += 1
+                    self.calories += 50
+            else:
+                world.removeFood(world.getFood(newloc))
+                self.eaten += 1
+                self.calories += 50
 
             
     def nextLoc(self):
