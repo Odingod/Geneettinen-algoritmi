@@ -188,7 +188,7 @@ class World(object):
         else:
             for x in range((WIDTH * HEIGHT) / 160):
                 if not self.USE_GRAPHICS:
-                    self.addCreature(creature.Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH, None, True))
+                    self.addCreature(creature.Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH, self, None, True))
                 else:
                     self.addCreature(CreatureLabel(self, (randint(0, WIDTH), randint(0, HEIGHT))))
         
@@ -209,7 +209,26 @@ class World(object):
                 for j in range(HEIGHT):
                     if (i < 5 or i > WIDTH - 6) and (j < 5 or j > HEIGHT - 6):
                         self.addFood((Food(i, j) if not self.USE_GRAPHICS else FoodLabel(self, (i, j))))
-    
+                        
+    def changeToWorldLabel(self,parent):
+        world = WorldLabel(parent)
+        parent.setCentralWidget(world)
+        world.terrain = self.terrain
+        world.tiles = self.tiles
+        world.drawTerrain()
+        for food in self.foods:
+            world.addFood(FoodLabel(world, self.foods[food].loc))
+        world.updateFoods()
+        for cre in self.creatures:
+            creature=CreatureLabel(world, self.creatures[cre].loc, self.creatures[cre].genome)
+            creature.eaten = self.creatures[cre].eaten
+            creature.calories = self.creatures[cre].calories
+            creature.dead = self.creatures[cre].dead
+            creature.miles= self.creatures[cre].miles
+            world.addCreature(creature) 
+        return world
+            
+            
 class Tile(object):
     def __init__(self, key, loc):
         self.key = key
@@ -269,4 +288,19 @@ class WorldLabel(QWidget, World):
         super(WorldLabel, self).populate(generation)
         self.updateFoods()
         self.update()
+        
+    def changeToWorld(self):
+        world = World(wUSE_GRAPHICS=False)
+        world.terrain = self.terrain
+        world.tiles = self.tiles
+        for cre in self.creatures:
+            creature=Creature(self.creatures[cre].loc, self.creatures[cre].heading, world, self.creatures[cre].genome)
+            creature.eaten = self.creatures[cre].eaten
+            creature.calories = self.creatures[cre].calories
+            creature.dead = self.creatures[cre].dead
+            creature.miles= self.creatures[cre].miles
+            world.addCreature(creature)
+        for food in self.foods:
+            world.addFood(Food(self.foods[food].loc))
+        return world
         

@@ -123,16 +123,13 @@ class MainWindow(QMainWindow):
         #self.terrainGenerator = terrain.DrunkardTerrainGenerator(width=WIDTH+1, height=HEIGHT+1)
         
         
-        self.world = WorldLabel() if USE_GRAPHICS else World()
+        self.world = WorldLabel() if USE_GRAPHICS else World(False)
         if USE_GRAPHICS:
             self.setCentralWidget(self.world)
         self.adjustSize()        
-        global world
         self.paused=False
-        world = self.world
-        self.genret = WorldRetriever(world)
         self.makeNewTerrain(terrainGenerator=self.terrainGenerator)
-        self.gen = Generation(10)
+        self.gen = Generation(10,self.world)
         self.world.populate(self.gen)
         self.year = 1
         self.day = 1
@@ -262,34 +259,34 @@ class MainWindow(QMainWindow):
         from file
         """
         if filename is None and isinstance(terrainGenerator, terrain.DrunkardTerrainGenerator) or isinstance(terrainGenerator, terrain.NoiseMapGenerator):
-            world.makeTerrain(terrainGenerator)
+            self.world.makeTerrain(terrainGenerator)
 
         elif isinstance(filename, str):
-            world.loadTerrain(filename)
+            self.world.loadTerrain(filename)
 
     def AddFood(self):
 
         location = self.mousePos
         print location
-        if not world.USE_GRAPHICS:
-            world.addFood(Food(location))
+        if not self.world.USE_GRAPHICS:
+            self.world.addFood(Food(location))
         else:
-            world.addFood(FoodLabel(world, location), rando=False)
+            self.world.addFood(FoodLabel(self.world, location), rando=False)
 
 
         
     def whatsHere(self):
 
         location = self.mousePos
-        if world.getFood(location):
+        if self.world.getFood(location):
             print "food"
-        elif world.getCreature(location):
+        elif self.world.getCreature(location):
             print "creature"
         print location
         
     def saveCreatureToFile(self):
         location = self.mousePos
-        creature = world.getCreature(location)
+        creature = self.world.getCreature(location)
         if creature:
             self.saveA({location: creature})
 
@@ -321,9 +318,9 @@ class MainWindow(QMainWindow):
         elif filename[0]:
             with open(filename[0], 'r') as f:
                 if clearFirst:
-                    world.removeCreatures()
+                    self.world.removeCreatures()
 
-                io.xmlToCreatures(filename[0], world, location)
+                io.xmlToCreatures(filename[0], self.world, location)
                 print "new creatures loaded"
                 
                 
@@ -342,7 +339,7 @@ class MainWindow(QMainWindow):
         elif filename[0]:
             with open(filename[0], 'w') as f:
                 if creaturesToSave is None:
-                    io.creaturesToXML(world.creatures, filename[0])
+                    io.creaturesToXML(self.world.creatures, filename[0])
                 else:
                     io.creaturesToXML(creaturesToSave, filename[0])
 
@@ -350,34 +347,35 @@ class MainWindow(QMainWindow):
     
     def fastestA(self):
         self.paused=False
+        if not self.world.USE_GRAPHICS:
+            return
         global USE_GRAPHICS
         USE_GRAPHICS = False
         print 'changed to no graph'
-        tempTerrain = world.terrain
-        self.world.setParent(None)
-        self.world = World()
-        global world
-        world = self.world
-        world.USE_GRAPHICS = False
-        world.terrain = tempTerrain
-        self.genret = WorldRetriever(world)
+        self.world=self.world.changeToWorld()
+        creatures=[]
+        for cre in self.world.creatures:
+            creatures.append(self.world.creatures[cre])
+        self.gen=Generation(self.gen.size,self.world,creatures)
+        self.setCentralWidget(None)
         self.timer.setInterval(0)
         
     def fastA(self):
         self.paused=False
-        if not USE_GRAPHICS:
+        if not self.world.USE_GRAPHICS:
             self.changeToGraphics()
         self.timer.setInterval(0)
     
     def normalA(self):
         self.paused=False
-        if not USE_GRAPHICS:
+        if not self.world.USE_GRAPHICS:
             self.changeToGraphics()
         self.timer.setInterval(100)
     
     def slowA(self):
         self.paused=False
-        if not USE_GRAPHICS:
+        if not self.world.USE_GRAPHICS:
+            print "changed"
             self.changeToGraphics()
         self.timer.setInterval(500)
     
@@ -389,35 +387,33 @@ class MainWindow(QMainWindow):
     
     def changeToGraphics(self):
         global USE_GRAPHICS
-        USE_GRAPHICS = True
-        tempTerrain = world.terrain
-        self.world = WorldLabel()
-        
-        global world
-        world = self.world
-        world.terrain = tempTerrain
-        world.USE_GRAPHICS = True
-        self.setCentralWidget(world)
-        world.drawTerrain()
-        self.genret = WorldRetriever(world)
+        USE_GRAPHICS = False
+        self.world=self.world.changeToWorldLabel(self)
+        creatures=[]
+        for cre in self.world.creatures:
+            creatures.append(self.world.creatures[cre])
+        self.gen=Generation(self.gen.size,self.world,creatures)
+        self.world.update()
+
     
     def doTurn(self):
         if self.paused:
             return
         if self.day < 200:
-            for cre in world.creatures.values():
+            for cre in self.world.creatures.values():
                 cre.doTurn()
 
-            for food in world.foods.values():
+            for food in self.world.foods.values():
                 pass
                 # food.animate()
 
-            if USE_GRAPHICS:
-                world.update()
-                self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2:03d}  Maximum: {3:03d} Average: {4:03d}'\
+            if self.world.USE_GRAPHICS:
+                self.world.update()
+                #realtime stats
+                self.highscore=self.gen.totalEaten()
+            self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2:03d}  Maximum: {3:03d} Average: {4:03d}'\
                                         .format(self.year, self.day, self.highscore, self.maximum, int(self.average)))
-            #realtime stats
-            #self.highscore=self.gen.totalEaten()
+
             self.day += 1
         else:
             self.statEaten.append(self.gen.totalEaten())
@@ -461,7 +457,7 @@ class MainWindow(QMainWindow):
             
         elif command == "addfood":
             try:
-                world.addFood(Food((int(Args[0]), int(Args[1]))) if not USE_GRAPHICS else FoodLabel(self, (int(Args[0]), int(Args[1]))))
+                self.world.addFood(Food((int(Args[0]), int(Args[1]))) if not USE_GRAPHICS else FoodLabel(self, (int(Args[0]), int(Args[1]))))
             except:
                 return "Unknown parameters in command" +string
         
@@ -481,11 +477,11 @@ class MainWindow(QMainWindow):
                 
                 if len(Args) == 3:
 
-                    creature = Creature((int(Args[0]), int(Args[1]), heading))
-                    world.addCreature(creature)
+                    creature = Creature((int(Args[0]), int(Args[1]), heading, self.world))
+                    self.world.addCreature(creature)
                 elif len(Args) == 4:
-                    creature = Creature((int(Args[0]), int(Args[1]), heading), Args[4])
-                    world.addCreature(creature)
+                    creature = Creature((int(Args[0]), int(Args[1])), heading, self.world, Args[4])
+                    self.world.addCreature(creature)
             except:
                 return "Unknown parameters in command" + string
         else:
@@ -558,7 +554,6 @@ class Cmd(QWidget):
             self.input.setText(self.commands[self.currentcommand])
         
 if __name__ == '__main__':
-    global world
     app = QApplication(sys.argv)
     mw = MainWindow()
     mw.show()
