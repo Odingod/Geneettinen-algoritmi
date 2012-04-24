@@ -65,7 +65,7 @@ from food import *
 from globals import *
 import terrain
 import io
-from statisticsWindow import *
+#Todo: from statisticsWindow import *
 #import creature
 
 
@@ -129,7 +129,7 @@ class MainWindow(QMainWindow):
         self.adjustSize()        
         self.paused=False
         self.makeNewTerrain(terrainGenerator=self.terrainGenerator)
-        self.gen = Generation(10,self.world)
+        self.gen = Generation((WIDTH * HEIGHT / 200),self.world)
         self.world.populate(self.gen)
         self.year = 1
         self.day = 1
@@ -366,7 +366,7 @@ class MainWindow(QMainWindow):
         self.paused=False
         if not self.world.USE_GRAPHICS:
             self.changeToGraphics()
-        self.timer.setInterval(0)
+        self.timer.setInterval(10)
     
     def normalA(self):
         self.paused=False
@@ -402,8 +402,10 @@ class MainWindow(QMainWindow):
         if self.paused:
             return
         if self.day < 200:
+            i = 0
             for cre in self.world.creatures.values():
                 cre.doTurn()
+                i+=1
 
             for food in self.world.foods.values():
                 pass

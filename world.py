@@ -101,7 +101,7 @@ class World(object):
                 self.creatures[creature.loc] = creature
                 if self.USE_GRAPHICS:
                     creature.move(x * GRIDSIZE, y * GRIDSIZE)
-                
+            print terrainType, inserted
             tries += 1
             rando = True
     

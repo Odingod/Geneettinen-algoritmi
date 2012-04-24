@@ -2,13 +2,15 @@
 from PySide.QtCore import *
 from PySide.QtGui import *
 
-SEED = '145'
+import random
+
+SEED = random.random()
 NORTH = (0, -1)
 EAST = (1, 0)
 SOUTH = (0, 1)
 WEST = (-1, 0)
-WIDTH = 60
-HEIGHT = 40
+WIDTH = 80
+HEIGHT = 60
 GRIDSIZE = 16
 global USE_GRAPHICS
 USE_GRAPHICS = True
@@ -29,6 +31,8 @@ MOUNTAIN_PIC = QImage('mountain.png')
 
 
 MUTATE = 10 #chance of mutation in ‰
+CROSSOVERRATE = 70 #chance of crossover in %
+
 TERRAINTYPES = {
     #format: 
     #'type' : (ID, (red, green, blue))

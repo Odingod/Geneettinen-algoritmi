@@ -4,6 +4,8 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 from random import randint
 from random import choice
+import random
+import neuronnet
 
 #from world import *
 #from gen import *
@@ -41,13 +43,12 @@ class Creature(object):
     def __init__(self, loc, heading, world, genome=None,test=False):
         self.loc = loc
         self.heading = heading
-        self.sight = 0
-        self.memory = 0
+        self.sight = []
         self.walked = 0
         self.world=world
-        self.accessibleTerrain = ['water', 'grass', 'forest', 'hill']
+        self.accessibleTerrain = ['water', 'grass', 'forest', 'hill', 'coast']
         if genome is None:
-            self.genome = [[(randint(0, len(choices) - 1), randint(0, 15)) for y in xrange(4)] for x in xrange(16)]
+            self.genome = neuronnet.NeuronNet(16,3,1,10)
         else: self.genome = genome
             
         self.eaten = 1
@@ -77,21 +78,22 @@ class Creature(object):
 
         if self.loc != newloc:
             self.walked += 1
-   
-        if self.world.getCreature(newloc) is None:
-            self.calories -= 10
-            if newloc not in self.miles:
-                self.miles.append(newloc)
-
-            if self.calories < 0:
-                self.dead = True
-                
-            self.world.updateLocation(self, newloc)
-
-        if self.world.getFood(newloc) is not None:
-            self.world.removeFood(self.world.getFood(newloc))
-            self.eaten += 1
-            self.calories += 50
+            if self.world.getCreature(newloc) is None:
+                self.calories -= 5
+                if newloc not in self.miles:
+                    self.miles.append(newloc)
+    
+                if self.calories < 0:
+                    self.dead = True
+                    
+                self.world.updateLocation(self, newloc)
+    
+            if self.world.getFood(newloc) is not None:
+                self.world.removeFood(self.world.getFood(newloc))
+                self.eaten += 1
+                self.calories += 50
+            return True
+        return False
 
             
     def nextLoc(self):
@@ -100,7 +102,7 @@ class Creature(object):
         '''
         newloc = (self.loc[0] + self.heading[0], self.loc[1] + self.heading[1])
         #print newloc
-#        print self.heading
+        #print self.heading
 
         if newloc[0] < 0:
             newloc = (0, newloc[1])
@@ -135,17 +137,8 @@ class Creature(object):
         '''
         Updates sight based on what is infront of the creature
         '''
-        nextLocation = self.nextLoc()
-        outOfBounds = nextLocation == self.loc
+        self.sight = self.see()
         
-        if self.world.getCreature(nextLocation) is not None and self.world.getCreature(nextLocation) is not self: 
-            self.sight = sights['CREATURE']
-
-        elif self.world.getFood(nextLocation) is not None:
-            self.sight = sights['VEGETABLE']
-        elif outOfBounds or self.nextTerrainType == 'deep_water' or self.nextTerrainType == 'mountain':
-            self.sight = sights['WALL']
-        else: self.sight = sights['NOTHING']
     
     def turnLeft(self):
         if self.heading == NORTH: self.turnSelf(WEST)
@@ -187,32 +180,90 @@ class Creature(object):
             return "right"
         else:
             return False
+        
+    def see(self):
+        center = (self.loc[0] + self.heading[0], self.loc[1] + self.heading[1])
+        if 0 > center[0] > WIDTH or 0 > center[1] > HEIGHT:
+            return [0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1]
+        up = (center[0] - 1, center[1])
+        down = (center[0] + 1, center[1])
+        left = (center[0], center[1] - 1)
+        right = (center[0], center[1] + 1)
+        if self.heading == NORTH: sights = [left,center,right,up]
+        elif self.heading == WEST: sights = [down,center,up,left]
+        elif self.heading == SOUTH: sights = [right,center,left,down]
+        elif self.heading == EAST: sights = [up,center,down,right]
+        newsight = []
+        for sight in sights:
+            if 0 > sight[0] or sight[0] >= WIDTH or 0 > sight[1] or sight[1] >= HEIGHT:
+                newsight.append(0)
+                newsight.append(0)
+                newsight.append(0)
+                newsight.append(1)
+            elif self.world.terrain[sight[0]][sight[1]] == 1 or self.world.terrain[sight[0]][sight[1]] == 7:
+                newsight.append(0)
+                newsight.append(0)
+                newsight.append(0)
+                newsight.append(1)
+            elif self.world.getCreature(sight) is not None:
+                newsight.append(0)
+                newsight.append(1)
+                newsight.append(0)
+                newsight.append(0)
+            elif self.world.getFood(sight) is not None:
+                newsight.append(0)
+                newsight.append(0)
+                newsight.append(1)
+                newsight.append(0)
+            else:
+                newsight.append(1)
+                newsight.append(0)
+                newsight.append(0)
+                newsight.append(0)
+        if newsight[7] == 1:
+            newsight[12] = 0
+            newsight[13] = 0
+            newsight[14] = 0
+            newsight[15] = 1
+        return newsight
+            
+        
+                
 
         
     def doAction(self):
         '''
         Does the action defined by the genome
         '''
-        #if self.sight!=0:  
-#        print self.memory,self.sight
-        a, b = self.genome[self.memory][self.sight]
-        if self.sight == sights['VEGETABLE']:
-            self.moveSelf()
-        elif self.foodAround() != False:
-            if self.foodAround() == "left":
-                self.turnLeft()
-            else:
-                self.turnRight()
-        else:
-            if a == choices['LEFT']: self.turnLeft()
-            elif a == choices['RIGHT']: self.turnRight()
-            elif a == choices['AROUND']: self.turnAround()
-            elif a == choices['MOVE']: self.moveSelf()
 
-        self.memory = b
+        output = self.genome.process(self.sight)
         
+        if output[0] > output[1] and output[0] > output[2]: 
+            self.turnLeft()
+            self.moveSelf()
+        elif output[2] > output[1] and output[2] > output[0]: 
+            self.turnRight()
+            self.moveSelf()
+        else: 
+            if not self.moveSelf():
+                if output[0] > output[2]:
+                    self.turnLeft()
+                    self.moveSelf()
+                else:
+                    self.turnRight()
+                    self.moveSelf()
+
     def fitness(self):
-        return (len(self.miles) + self.eaten - 1)
+        print len(self.miles), self.eaten, self.isDead(),'=',
+        fit = (2*len(self.miles) + 5 * self.eaten - 1)
+        if self.isDead():
+            fit -= 20
+            if fit < 1:
+                fit = 1
+        if len(self.miles) < 10:
+            fit = 0
+        print fit
+        return fit
         
     def combine(self,other):
         '''
@@ -222,20 +273,9 @@ class Creature(object):
         The splitting point point is chosen by random.
         This could be a bit more elaborate.
         http://en.wikipedia.org/wiki/Crossover_%28genetic_algorithm%29
-        ''' 
-        newGenome = [[None] * 4 for x in xrange(16)]
-        a, b = randint(0, len(choices) - 1), randint(0, 15)
-
-        for x in xrange(16):
-            for y in xrange(4):
-                if randint(0, 1000) < MUTATE:
-                    newGenome[x][y] = (randint(0, len(choices) - 1), randint(0, 15))
-                elif x is b and y > a:
-                    newGenome[x][y] = other.genome[x][y]
-                elif x > b:
-                    newGenome[x][y] = other.genome[x][y]
-                else:
-                    newGenome[x][y] = self.genome[x][y]
+        '''
+        
+        newGenome = self.genome.mate(other.genome)
 
         if self.world.USE_GRAPHICS:
             return CreatureLabel(self.world, (randint(0, WIDTH), randint(0, HEIGHT)), newGenome)
@@ -297,6 +337,15 @@ class Generation(object):
 
         else: self.creatures = creatures
 
+    def rouletteSelection(self, fitness_list):
+        total_fitness = sum(fitness_list)
+        slice = random.random() * total_fitness
+        
+        total = 0
+        for i in range(self.size):
+            total += fitness_list[i]
+            if total > slice:
+                return self.creatures[i]
 
     def nextGeneration(self):
         '''
@@ -306,14 +355,15 @@ class Generation(object):
         The more the creature has eaten and visited places the more places it gets on the candidate list.
         Then new creatures are created by randomly choosing the creatures to combine.
         '''
+        fitness_list = [self.creatures[i].fitness() for i in xrange(len(self.creatures))]
 
-        candidates = sum([[i] * self.creatures[i].fitness() for i in xrange(len(self.creatures))], [])
-        # sum is used to flatten the list of lists
-        # print dict((candidate, candidates.count(candidate)) for candidate in candidates)
-        creatures = []
+        creatures = [self.creatures[fitness_list.index(max(fitness_list))]]
 
-        for x in xrange(self.size):
-            creatures.append(self.creatures[choice(candidates)].combine(self.creatures[choice(candidates)]))
+        for x in xrange(self.size-1):
+            mother = self.rouletteSelection(fitness_list)
+            father = self.rouletteSelection(fitness_list)
+            newcre = mother.combine(father)
+            creatures.append(newcre)
 
         return Generation(self.size,self.world, creatures)
     
