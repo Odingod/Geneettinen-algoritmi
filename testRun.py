@@ -4,6 +4,7 @@ from gen import *
 from globals import *
 from world import *
 from terrain import *
+from io import *
 
 class TestCreature(unittest.TestCase):
 
@@ -25,6 +26,24 @@ class TestCreature(unittest.TestCase):
 	def tearDown(self):
 		pass
 
+class TestIO(unittest.TestCase):
+    #Student: Jussi Lopponen
+
+	def setUp(self):
+		pass
+    
+	def test_terrain(self):
+		terrain = NoiseMapGenerator()
+		terrain.generate()
+		terrain.saveMap('testi.data')
+		anotherTerrain = mapFileToArray('testi.data')
+		self.assertEqual(terrain.getTerrainData(),anotherTerrain)
+
+	def tearDown(self):
+		pass
+
 if __name__ == '__main__':
-	suite = unittest.TestLoader().loadTestsFromTestCase(TestCreature)
-	unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestCreature)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestIO)
+    unittest.TextTestRunner(verbosity=2).run(suite)
