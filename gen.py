@@ -129,8 +129,12 @@ class MainWindow(QMainWindow):
         self.adjustSize()        
         self.paused=False
         self.makeNewTerrain(terrainGenerator=self.terrainGenerator)
-        self.gen = Generation((WIDTH * HEIGHT / 200),self.world)
-        self.world.populate(self.gen)
+        self.gen = Generation(SCALEDPOPULATION,self.world)
+        if GAMEOFLIFE:
+            self.foodgen=FoodGeneration(SCALEDFOOD, self.world)
+            self.world.populate(self.gen, self.foodgen)
+        else:
+            self.world.populate(self.gen)
         self.year = 1
         self.day = 1
         self.timer = QTimer(self)
@@ -279,11 +283,13 @@ class MainWindow(QMainWindow):
 
         location = self.mousePos
         if self.world.getFood(location):
-            print "food"
+            obj = mapObject(Food, self)
         elif self.world.getCreature(location):
-            print "creature"
-        print location
-        
+            obj = mapObject(Creature, self)
+        else:
+            msgBox = QMessageBox()
+            msgBox.setText("Nothing special here!")
+            msgBox.exec_()
     def saveCreatureToFile(self):
         location = self.mousePos
         creature = self.world.getCreature(location)
@@ -432,8 +438,15 @@ class MainWindow(QMainWindow):
             self.average=self.statAverageEaten[-1]
             self.highscore = self.statEaten[-1]
             self.gen = self.gen.nextGeneration()
-            self.world.removeEverything()
-            self.world.populate(self.gen)
+
+            if GAMEOFLIFE:
+                self.foodgen=self.foodgen.nextFoodGeneration()
+                self.world.removeEverything()
+                self.world.populate(self.gen, self.foodgen)
+                
+            else:
+                self.world.removeEverything()
+                self.world.populate(self.gen)
             self.year += 1
             self.day = 1
             self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2:03d}  Maximum: {3:03d} Average: {4:03d}'\
@@ -558,6 +571,27 @@ class Cmd(QWidget):
             self.currentcommand -=1
             self.currentcommand = self.currentcommand % len(self.commands)
             self.input.setText(self.commands[self.currentcommand])
+class mapObject(QWidget):
+    def __init__(self, type, parent=None):
+        super(mapObject, self).__init__(parent)
+        super(mapObject, self).setWindowFlags(Qt.Window)
+        self.parent = parent
+        
+        self.lbl = QLabel()
+        self.label = QLabel()
+        if type == Creature:
+            self.lbl.setPixmap(QPixmap.fromImage(CREATURE_PIC[3]))
+            self.label.setText("Its a creature")
+        if type == Food:
+            self.lbl.setPixmap(QPixmap.fromImage(FOOD_PIC))
+            self.label.setText("Its food")
+        layout = QVBoxLayout()
+        layout.addWidget(self.lbl)
+        layout.addWidget(self.label)
+        self.setLayout(layout)
+        self.adjustSize()
+        self.show()
+    
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -12,6 +12,8 @@ WEST = (-1, 0)
 WIDTH = 80
 HEIGHT = 60
 GRIDSIZE = 16
+SCALEDPOPULATION = WIDTH * HEIGHT / 200
+SCALEDFOOD = WIDTH * HEIGHT / 10
 global USE_GRAPHICS
 USE_GRAPHICS = True
 CREATURE_PIC = [QImage('jpac.png').transformed(QTransform().rotate(a)) for a in xrange(0,360,90)]
@@ -63,7 +65,7 @@ TERRAINTYPEIMAGE = {
 
 IDINDEX = 0
 RGBINDEX = 1
-
+GAMEOFLIFE=False
 
 
 def getAssociatedRGB(terrainKey="", terrainID=-1):

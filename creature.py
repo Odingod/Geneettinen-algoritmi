@@ -52,7 +52,7 @@ class Creature(object):
         else: self.genome = genome
             
         self.eaten = 1
-        self.calories = 500
+        self.calories = 1000
         self.dead = False
         self.miles = []
         if test:
@@ -74,12 +74,18 @@ class Creature(object):
         Also eats food  if there is some on the new square
         '''
 
-        newloc = self.nextLoc()     
+        newloc = self.nextLoc() 
+        terrain = getAssociatedKey(ID=self.world.terrain[newloc[0]][newloc[1]])    
 
         if self.loc != newloc:
             self.walked += 1
-            if self.world.getCreature(newloc) is None:
+            if terrain == 'grass' or terrain == 'coast':
                 self.calories -= 5
+            elif terrain == 'water' or terrain == 'hill':
+                self.calories -= 15
+            elif terrain == 'forest':
+                self.calories -= 10
+            if self.world.getCreature(newloc) is None:
                 if newloc not in self.miles:
                     self.miles.append(newloc)
     
@@ -89,12 +95,17 @@ class Creature(object):
                 self.world.updateLocation(self, newloc)
     
             if self.world.getFood(newloc) is not None:
-                self.world.removeFood(self.world.getFood(newloc))
-                self.eaten += 1
-                self.calories += 50
+                if GAMEOFLIFE:
+                    if self.world.getFood(newloc).isAlive():
+                        self.world.removeFood(self.world.getFood(newloc))
+                        self.eaten += 1
+                        self.calories += 100
+                else:
+                    self.world.removeFood(self.world.getFood(newloc))
+                    self.eaten += 1
+                    self.calories += 100
             return True
         return False
-
             
     def nextLoc(self):
         '''
@@ -158,29 +169,6 @@ class Creature(object):
         elif self.heading == SOUTH: self.turnSelf(NORTH)
         elif self.heading == EAST: self.turnSelf(WEST)
         
-    def foodAround(self):
-        '''
-        returns the direction where is food or False if there isn't food near
-        '''
-        if self.heading == NORTH:
-            left = (self.loc[0] - 1, self.loc[1])
-            right = (self.loc[0] + 1, self.loc[1])
-        elif self.heading == WEST:
-            left = (self.loc[0], self.loc[1] + 1)
-            right = (self.loc[0], self.loc[1] - 1)
-        elif self.heading == SOUTH:
-            left = (self.loc[0] + 1, self.loc[1])
-            right = (self.loc[0] - 1, self.loc[1])
-        elif self.heading == EAST:
-            left = (self.loc[0], self.loc[1] - 1)
-            right = (self.loc[0], self.loc[1] + 1)
-        if self.world.getFood(left) is not None:
-            return "left"
-        elif self.world.getFood(right) is not None:
-            return "right"
-        else:
-            return False
-        
     def see(self):
         center = (self.loc[0] + self.heading[0], self.loc[1] + self.heading[1])
         if 0 > center[0] > WIDTH or 0 > center[1] > HEIGHT:
@@ -235,7 +223,6 @@ class Creature(object):
         '''
         Does the action defined by the genome
         '''
-
         output = self.genome.process(self.sight)
         
         if output[0] > output[1] and output[0] > output[2]: 
@@ -254,17 +241,12 @@ class Creature(object):
                     self.moveSelf()
 
     def fitness(self):
-        print len(self.miles), self.eaten, self.isDead(),'=',
-        fit = (2*len(self.miles) + 5 * self.eaten - 1)
         if self.isDead():
-            fit -= 20
-            if fit < 1:
-                fit = 1
-        if len(self.miles) < 10:
-            fit = 0
-        print fit
+            fit = 1
+        else:    
+            fit = len(self.miles) / 10 + self.eaten
         return fit
-        
+    
     def combine(self,other):
         '''
         Mates self and other and produces another creature and returns it.
@@ -282,8 +264,6 @@ class Creature(object):
         else:
             return Creature((randint(0, WIDTH), randint(0, HEIGHT)), NORTH, self.world, newGenome)
         
-        
-
 class CreatureLabel(QLabel, Creature):
     '''
     Class that inherits from Creature and QLabel and that can be added to the WorldLabel
@@ -366,6 +346,22 @@ class Generation(object):
             creatures.append(newcre)
 
         return Generation(self.size,self.world, creatures)
+    
+    def totalFitness(self):
+        total = 0
+        for cre in self.creatures:
+            total += cre.fitness()
+        return total
+    
+    def fitnessFactor(self, creature, total):
+        '''
+        returns how many places creature should have on the candidate list
+        '''
+        part = float(creature.fitness()) / total
+        places = int(part * 30)
+        if places < 1 and not creature.isDead():
+            return 1
+        return places
     
     def totalEaten(self):
         '''
