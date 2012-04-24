@@ -16,7 +16,11 @@ class TestCreature(unittest.TestCase):
 	
 	def test_alive(self):
 		self.assertFalse(self.world.creatures[self.world.creatures.keys()[0]].isDead())
-	
+	def test_destruction(self):
+		#Teemu Leivo
+		self.world.removeEverything()
+		self.assertFalse(self.world.creatures)
+		self.assertFalse(self.world.foods)
 	def test_combine(self):
 		cre1=self.world.creatures[self.world.creatures.keys()[0]]
 		cre2=self.world.creatures[self.world.creatures.keys()[1]]
