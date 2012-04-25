@@ -65,7 +65,7 @@ from food import *
 from globals import *
 import terrain
 import io
-#from statisticsWindow import StatisticsWindow
+from statisticsWindow import StatisticsWindow
 #Todo: from statisticsWindow import *
 #import creature
 
