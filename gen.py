@@ -65,7 +65,7 @@ from food import *
 from globals import *
 import terrain
 import io
-from statisticsWindow import StatisticsWindow
+#from statisticsWindow import StatisticsWindow
 #Todo: from statisticsWindow import *
 #import creature
 
@@ -286,7 +286,10 @@ class MainWindow(QMainWindow):
         if self.world.getFood(location):
             obj = mapObject(Food, self)
         elif self.world.getCreature(location):
-            obj = mapObject(Creature, self)
+            if self.world.getCreature(location).isDead():
+                obj = mapObject("Corpse", self)
+            else:
+                obj = mapObject(Creature, self)
         else:
             msgBox = QMessageBox()
             msgBox.setText("Nothing special here!")
@@ -583,8 +586,11 @@ class mapObject(QWidget):
         self.lbl = QLabel()
         self.label = QLabel()
         if type == Creature:
-            self.lbl.setPixmap(QPixmap.fromImage(CREATURE_PIC[3]))
+            self.lbl.setPixmap(QPixmap.fromImage(CREATURE_PIC[0]))
             self.label.setText("Its a creature")
+        if type == "Corpse":
+            self.lbl.setPixmap(QPixmap.fromImage(CORPSE_PIC))
+            self.label.setText("Its a dead creature :(")
         if type == Food:
             self.lbl.setPixmap(QPixmap.fromImage(FOOD_PIC))
             self.label.setText("Its food")

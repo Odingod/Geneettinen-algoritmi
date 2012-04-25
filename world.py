@@ -116,7 +116,7 @@ class World(object):
         #     return
         # food.loc = (randint(0, WIDTH), randint(0, HEIGHT))
         # self.addFood(food)
-        if not GAMEOFLIFE:
+        if not GAMEOFLIFE and rando:
             inserted = False
             tries = 0
             while not inserted and tries < 10:
@@ -130,7 +130,6 @@ class World(object):
                     if self.USE_GRAPHICS:
                         food.move(x * GRIDSIZE, y * GRIDSIZE)
                 tries += 1
-        
         
         else:
             x = food.loc[0]
