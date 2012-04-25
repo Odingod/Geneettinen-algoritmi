@@ -101,7 +101,6 @@ class World(object):
                 self.creatures[creature.loc] = creature
                 if self.USE_GRAPHICS:
                     creature.move(x * GRIDSIZE, y * GRIDSIZE)
-            print terrainType, inserted
             tries += 1
             rando = True
     
@@ -130,12 +129,12 @@ class World(object):
                     self.foods[food.loc] = food
                     if self.USE_GRAPHICS:
                         food.move(x * GRIDSIZE, y * GRIDSIZE)
-                tries+=1
+                tries += 1
         
         
         else:
-            x=food.loc[0]
-            y=food.loc[1]
+            x = food.loc[0]
+            y = food.loc[1]
             terrainType = getAssociatedKey(ID=self.terrain[x][y])
             if food.loc not in self.foods and (terrainType != 'mountain' and terrainType != 'deep_water'):
                 inserted = True
@@ -203,24 +202,25 @@ class World(object):
                     self.addCreature(CreatureLabel(self, (randint(0, WIDTH), randint(0, HEIGHT))))
         
 
-        if not GAMEOFLIFE or foodgeneration==None:
+        if not GAMEOFLIFE or foodgeneration is None:
             for x in range(SCALEDFOOD):
-                if not USE_GRAPHICS:
+                if not self.USE_GRAPHICS:
                     self.addFood(Food((randint(0, WIDTH), randint(0, HEIGHT))))
                 else:
                     self.addFood(FoodLabel(self, (randint(0, WIDTH), randint(0, HEIGHT))))
                     
         else:
             for food in foodgeneration.foods.values():
-                self.addFood(food)
+                if not self.USE_GRAPHICS:
+                    self.addFood(food)
+                else:
+                    self.addFood(FoodLabel(self, (randint(0, WIDTH), randint(0, HEIGHT))))
+                    
                 
-
-
-    
-                     
     def changeToWorldLabel(self,parent):
         world = WorldLabel(parent)
         parent.setCentralWidget(world)
+        world.USE_GRAPHICS = True
         world.terrain = self.terrain
         world.tiles = self.tiles
         world.drawTerrain()
@@ -228,11 +228,11 @@ class World(object):
             world.addFood(FoodLabel(world, self.foods[food].loc))
         world.updateFoods()
         for cre in self.creatures:
-            creature=CreatureLabel(world, self.creatures[cre].loc, self.creatures[cre].genome)
+            creature = CreatureLabel(world, self.creatures[cre].loc, self.creatures[cre].genome)
             creature.eaten = self.creatures[cre].eaten
             creature.calories = self.creatures[cre].calories
             creature.dead = self.creatures[cre].dead
-            creature.miles= self.creatures[cre].miles
+            creature.miles = self.creatures[cre].miles
             world.addCreature(creature) 
         return world
             
@@ -241,7 +241,7 @@ class Statistics():
     def __init__(self, totaleaten, totalwalked, totalalive=None):
         self.totaleaten = totaleaten
         self.totalwalked = totalwalked
-        self.totalalive=totalalive
+        self.totalalive = totalalive
         
 class Tile(object):
     def __init__(self, key, loc):
@@ -312,11 +312,11 @@ class WorldLabel(QWidget, World):
         world.terrain = self.terrain
         world.tiles = self.tiles
         for cre in self.creatures:
-            creature=Creature(self.creatures[cre].loc, self.creatures[cre].heading, world, self.creatures[cre].genome)
+            creature = Creature(self.creatures[cre].loc, self.creatures[cre].heading, world, self.creatures[cre].genome)
             creature.eaten = self.creatures[cre].eaten
             creature.calories = self.creatures[cre].calories
             creature.dead = self.creatures[cre].dead
-            creature.miles= self.creatures[cre].miles
+            creature.miles = self.creatures[cre].miles
             world.addCreature(creature)
         for food in self.foods:
             world.addFood(Food(self.foods[food].loc))

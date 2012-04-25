@@ -17,22 +17,22 @@ class Food(object):
     def __init__(self, loc, parent=None, alive=None):
         self.loc = loc
         if GAMEOFLIFE:
-            self.parent=parent
-            self.parent.foods[self.loc]=self
-            self.neighbours=self.getNeighbours()
-            if alive!=None:
+            self.parent = parent
+            self.parent.foods[self.loc] = self
+            self.neighbours = self.getNeighbours()
+            if alive != None:
                 self.alive=alive
             else:
-                self.alive=True
+                self.alive = True
     
     def isAlive(self):
         return self.alive
         
     def getNeighbours(self): 
-        neighbours=[]   
-        x=self.loc[0]
-        y=self.loc[1]
-        neighbourhood=[(x-1, y-1),(x, y-1), (x+1, y-1), (x, y-1), (x, y+1), (x+1, y-1), (x+1, y), (x+1, y+1) ]
+        neighbours = []   
+        x = self.loc[0]
+        y = self.loc[1]
+        neighbourhood = [(x - 1, y - 1), (x, y - 1), (x + 1, y - 1), (x, y - 1), (x, y + 1), (x + 1, y - 1), (x + 1, y), (x + 1, y + 1) ]
         for location in neighbourhood:
             if self.parent.foods.has_key(location):
                 neighbours.append(self.parent.foods[location])
@@ -72,41 +72,41 @@ class FoodGeneration(object):
     '''
     def __init__(self, size, parent, foods=None):
         self.size = size
-        self.parent=parent
+        self.parent = parent
         if foods is None:
             self.foods = {}
-            i=0
+            i = 0
             for i in range(0, WIDTH):
                 for j in range(0, HEIGHT):
-                    loc=i,j
-                    if USE_GRAPHICS:
-                        self.foods[loc]=FoodLabel(self.parent, loc, False)
+                    loc = i, j
+                    if parent.USE_GRAPHICS:
+                        self.foods[loc] = FoodLabel(self.parent, loc, False)
     
                     else: 
-                        self.foods[loc]=Food(loc, self.parent, False)
-            i=0
+                        self.foods[loc] = Food(loc, self.parent, False)
+            i = 0
             while i < self.size:
-                x=randint(0, WIDTH-1)
-                y=randint(0, HEIGHT-1)
-                loc=x,y
-                terrainType=getAssociatedKey(ID=self.parent.terrain[x][y])
-                if terrainType!='mountain' and terrainType!='deep_water' and not self.foods[loc].isAlive():
+                x = randint(0, WIDTH-1)
+                y = randint(0, HEIGHT-1)
+                loc = x, y
+                terrainType = getAssociatedKey(ID=self.parent.terrain[x][y])
+                if terrainType != 'mountain' and terrainType != 'deep_water' and not self.foods[loc].isAlive():
                     self.foods[loc].resurrect()
-                    i+=1     
+                    i += 1     
         else: 
-            self.foods=foods
+            self.foods = foods
 
     def nextFoodGeneration(self):
         
-        dead=[]
-        resurrected=[]
+        dead = []
+        resurrected = []
         
         for loc, food in self.foods.iteritems():
-            n=0
+            n = 0
             
             for neighbour in food.neighbours:
                 if neighbour.isAlive():
-                    n+=1
+                    n += 1
             if food.isAlive():
                 if n < 2:
                     dead.append(loc)
@@ -115,7 +115,7 @@ class FoodGeneration(object):
                 else:
                     resurrected.append(loc)
             else:
-                if n==3:
+                if n == 3:
                     resurrected.append(loc)
             
         for loc in dead:
@@ -127,9 +127,9 @@ class FoodGeneration(object):
         return self
         
     def totalAlive(self):
-        i=0
+        i = 0
         for food in self.foods.values():
             if food.isAlive():
-                i+=1
+                i += 1
         return i
         

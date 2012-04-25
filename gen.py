@@ -65,6 +65,7 @@ from food import *
 from globals import *
 import terrain
 import io
+from statisticsWindow import StatisticsWindow
 #Todo: from statisticsWindow import *
 #import creature
 
@@ -131,7 +132,7 @@ class MainWindow(QMainWindow):
         self.makeNewTerrain(terrainGenerator=self.terrainGenerator)
         self.gen = Generation(SCALEDPOPULATION,self.world)
         if GAMEOFLIFE:
-            self.foodgen=FoodGeneration(SCALEDFOOD, self.world)
+            self.foodgen = FoodGeneration(SCALEDFOOD, self.world)
             self.world.populate(self.gen, self.foodgen)
         else:
             self.world.populate(self.gen)
@@ -140,7 +141,7 @@ class MainWindow(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.doTurn)
         self.timer.start(1)
-        self.statWindow=None
+        self.statWindow = None
         self.AddFoodAct = QAction("&Add food",self,
                                   statusTip="Add food to location",
                                   triggered=self.AddFood)
@@ -165,16 +166,16 @@ class MainWindow(QMainWindow):
         self.statAverageWalked = []
         self.maximum = 0
         self.totalEaten = 0
-        self.totalWalked= 0
-        self.average=0.0
+        self.totalWalked = 0
+        self.average =0.0
                 
     def showStatisticsA(self, Statistics=None):
         if not self.statWindow:
-            self.statWindow=StatisticsWindow(self)
+            self.statWindow = StatisticsWindow(self)
             self.statWindow.show()
             
     def closeStatWindow(self):
-        self.statWindow=None
+        self.statWindow = None
         
     def exportStatisticsA(self,statistics=None):
         if self.statWindow:
@@ -354,41 +355,41 @@ class MainWindow(QMainWindow):
                 print "Creature(s) saved to", filename
     
     def fastestA(self):
-        self.paused=False
+        self.paused = False
         if not self.world.USE_GRAPHICS:
             return
-        global USE_GRAPHICS
-        USE_GRAPHICS = False
-        print 'changed to no graph'
-        self.world=self.world.changeToWorld()
-        creatures=[]
+        # global USE_GRAPHICS
+        # USE_GRAPHICS = False
+        # self.world.USE_GRAPHICS = False
+        # print 'changed to no graph'
+        self.world = self.world.changeToWorld()
+        creatures = []
         for cre in self.world.creatures:
             creatures.append(self.world.creatures[cre])
-        self.gen=Generation(self.gen.size,self.world,creatures)
+        self.gen = Generation(self.gen.size, self.world,creatures)
         self.setCentralWidget(None)
         self.timer.setInterval(0)
         
     def fastA(self):
-        self.paused=False
+        self.paused = False
         if not self.world.USE_GRAPHICS:
             self.changeToGraphics()
         self.timer.setInterval(10)
     
     def normalA(self):
-        self.paused=False
+        self.paused = False
         if not self.world.USE_GRAPHICS:
             self.changeToGraphics()
         self.timer.setInterval(100)
     
     def slowA(self):
-        self.paused=False
+        self.paused = False
         if not self.world.USE_GRAPHICS:
-            print "changed"
             self.changeToGraphics()
         self.timer.setInterval(500)
     
     def pauseA(self):
-        self.paused=True
+        self.paused = True
     
     def settingsA(self):
         print 'Not implemented yet'
@@ -396,11 +397,11 @@ class MainWindow(QMainWindow):
     def changeToGraphics(self):
         global USE_GRAPHICS
         USE_GRAPHICS = False
-        self.world=self.world.changeToWorldLabel(self)
-        creatures=[]
+        self.world = self.world.changeToWorldLabel(self)
+        creatures = []
         for cre in self.world.creatures:
             creatures.append(self.world.creatures[cre])
-        self.gen=Generation(self.gen.size,self.world,creatures)
+        self.gen = Generation(self.gen.size, self.world,creatures)
         self.world.update()
 
     
@@ -411,42 +412,44 @@ class MainWindow(QMainWindow):
             i = 0
             for cre in self.world.creatures.values():
                 cre.doTurn()
-                i+=1
+                i += 1
 
-            for food in self.world.foods.values():
-                pass
+            # for food in self.world.foods.values():
+            #     pass
                 # food.animate()
 
             if self.world.USE_GRAPHICS:
                 self.world.update()
                 #realtime stats
-                self.highscore=self.gen.totalEaten()
-                self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2:03d}  Maximum: {3:03d} Average: {4:03d}'\
+                self.highscore = self.gen.totalEaten()
+                self.status.setText('Year: {0:}        Day: {1:03d}  Total eaten: {2:03d}  Maximum: {3:03d} Average: {4:03d}'\
                                         .format(self.year, self.day, self.highscore, self.maximum, int(self.average)))
 
             self.day += 1
+            
         else:
             self.statEaten.append(self.gen.totalEaten())
             self.statWalked.append(self.gen.totalWalked())
             self.totalEaten += self.statEaten[-1]
-            self.totalWalked+= self.statWalked[-1]
+            self.totalWalked += self.statWalked[-1]
             if self.gen.totalEaten() > self.maximum: 
             	self.maximum = self.gen.totalEaten()
 
             self.statAverageEaten.append(self.totalEaten / self.year)
             self.statAverageWalked.append(self.totalWalked / self.year)
-            self.average=self.statAverageEaten[-1]
+            self.average = self.statAverageEaten[-1]
             self.highscore = self.statEaten[-1]
             self.gen = self.gen.nextGeneration()
 
             if GAMEOFLIFE:
-                self.foodgen=self.foodgen.nextFoodGeneration()
+                self.foodgen = self.foodgen.nextFoodGeneration()
                 self.world.removeEverything()
                 self.world.populate(self.gen, self.foodgen)
                 
             else:
                 self.world.removeEverything()
                 self.world.populate(self.gen)
+                
             self.year += 1
             self.day = 1
             self.status.setText('Year: {0:}         Day: {1:03d}  Total eaten: {2:03d}  Maximum: {3:03d} Average: {4:03d}'\
@@ -476,7 +479,7 @@ class MainWindow(QMainWindow):
             
         elif command == "addfood":
             try:
-                self.world.addFood(Food((int(Args[0]), int(Args[1]))) if not USE_GRAPHICS else FoodLabel(self, (int(Args[0]), int(Args[1]))))
+                self.world.addFood(Food((int(Args[0]), int(Args[1]))) if not self.world.USE_GRAPHICS else FoodLabel(self, (int(Args[0]), int(Args[1]))))
             except:
                 return "Unknown parameters in command" +string
         
@@ -571,12 +574,12 @@ class Cmd(QWidget):
             self.currentcommand -=1
             self.currentcommand = self.currentcommand % len(self.commands)
             self.input.setText(self.commands[self.currentcommand])
+            
 class mapObject(QWidget):
     def __init__(self, type, parent=None):
         super(mapObject, self).__init__(parent)
         super(mapObject, self).setWindowFlags(Qt.Window)
         self.parent = parent
-        
         self.lbl = QLabel()
         self.label = QLabel()
         if type == Creature:

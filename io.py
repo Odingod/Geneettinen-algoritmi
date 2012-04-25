@@ -222,6 +222,8 @@ def xmlToCreatures(filename, world, location=None):
     
     Arguments:
     - `filename`: Name of the XML that contains creatures
+    - `world`: world where function should insert creatures
+    
     Returns dictionary of creatures
     """
     creatures = {}

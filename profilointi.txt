@@ -1,0 +1,89 @@
+
+
+Ajettu suurimmaksi osaksi fastest-moodissa
+55022819 function calls in 87.758 seconds
+
+   Ordered by: call count
+
+
+
+ncalls: number of calls,
+tottime: total time spent in the given function (and excluding time made in calls to sub-functions),
+percall: is the quotient of tottime divided by ncalls
+cumtime: is the total time spent in this and all subfunctions (from invocation till exit). This figure is accurate even for recursive functions.
+percall: is the quotient of cumtime divided by primitive calls
+filename:lineno(function): provides the respective data of each function 
+
+
+|   ncalls | tottime | percall | cumtime | percall | filename:lineno(function)                                 |
+|----------+---------+---------+---------+---------+-----------------------------------------------------------|
+| 19475059 |   1.899 |   0.000 |   1.899 |   0.000 | {method 'append' of 'list' objects}                       |
+|  8638491 |   7.318 |   0.000 |   7.318 |   0.000 | {zip}                                                     |
+|  8626761 |  27.573 |   0.000 |  34.875 |   0.000 | neuronnet.py:29(product)                                  |
+|  2838711 |   3.188 |   0.000 |   3.188 |   0.000 | world.py:161(getCreature)                                 |
+|  2176196 |   2.334 |   0.000 |   2.334 |   0.000 | world.py:167(getFood)                                     |
+|  1514195 |   2.505 |   0.000 |   3.020 |   0.000 | globals.py:116(getAssociatedKey)                          |
+|  1514195 |   0.515 |   0.000 |   0.515 |   0.000 | {method 'items' of 'dict' objects}                        |
+|  1352791 |   0.271 |   0.000 |   0.271 |   0.000 | creature.py:65(isDead)                                    |
+|  1234878 |   0.103 |   0.000 |   0.103 |   0.000 | {method 'random' of '_random.Random' objects}             |
+|   813168 |   1.122 |   0.000 |  71.966 |   0.000 | creature.py:137(doTurn)                                   |
+|   702369 |   4.489 |   0.000 |  12.556 |   0.000 | creature.py:71(moveSelf)                                  |
+|   702369 |   1.547 |   0.000 |   3.149 |   0.000 | creature.py:110(nextLoc)                                  |
+|   663597 |   0.712 |   0.000 |  14.491 |   0.000 | creature.py:147(updateSelf)                               |
+|   663597 |   1.314 |   0.000 |  56.187 |   0.000 | creature.py:222(doAction)                                 |
+|   663597 |   8.953 |   0.000 |  13.779 |   0.000 | creature.py:172(see)                                      |
+|   663597 |   5.782 |   0.000 |  41.550 |   0.000 | neuronnet.py:35(process)                                  |
+|   535543 |   0.635 |   0.000 |   0.739 |   0.000 | world.py:153(updateLocation)                              |
+|   437440 |   0.614 |   0.000 |   0.655 |   0.000 | /usr/lib/python2.7/random.py:173(randrange)               |
+|   437440 |   0.209 |   0.000 |   0.864 |   0.000 | /usr/lib/python2.7/random.py:237(randint)                 |
+|   416757 |   0.116 |   0.000 |   0.116 |   0.000 | creature.py:134(turnSelf)                                 |
+|   209014 |   0.214 |   0.000 |   0.386 |   0.000 | creature.py:160(turnRight)                                |
+|   207743 |   0.220 |   0.000 |   0.380 |   0.000 | creature.py:154(turnLeft)                                 |
+|    82402 |   0.271 |   0.000 |   0.939 |   0.000 | world.py:107(addFood)                                     |
+|    82402 |   0.099 |   0.000 |   0.099 |   0.000 | food.py:17(__init__)                                      |
+|    81667 |   0.044 |   0.000 |   0.044 |   0.000 | world.py:147(removeFood)                                  |
+|    51353 |   0.320 |   0.000 |   0.381 |   0.000 | neuronnet.py:5(__init__)                                  |
+|    34222 |   0.043 |   0.000 |   0.043 |   0.000 | {method 'values' of 'dict' objects}                       |
+|    34052 |   0.690 |   0.000 |  79.933 |   0.002 | gen.py:408(doTurn)                                        |
+|    21699 |   0.192 |   0.000 |   0.192 |   0.000 | {method 'move' of 'PySide.QtGui.QWidget' objects}         |
+|    13462 |   0.627 |   0.000 |   0.627 |   0.000 | {fromImage}                                               |
+|    13462 |   0.076 |   0.000 |   0.076 |   0.000 | {method 'setPixmap' of 'PySide.QtGui.QLabel' objects}     |
+|     7990 |   0.007 |   0.000 |   0.007 |   0.000 | {range}                                                   |
+|     7820 |   0.024 |   0.000 |   0.033 |   0.000 | creature.py:320(rouletteSelection)                        |
+|     7820 |   0.076 |   0.000 |   0.453 |   0.000 | neuronnet.py:11(__init__)                                 |
+|     7820 |   0.003 |   0.000 |   0.003 |   0.000 | {sum}                                                     |
+|     6862 |   0.010 |   0.000 |   0.010 |   0.000 | {method 'resize' of 'PySide.QtGui.QWidget' objects}       |
+|     6861 |   2.163 |   0.000 |   2.163 |   0.000 | {method 'show' of 'PySide.QtGui.QWidget' objects}         |
+|     6768 |   0.011 |   0.000 |   0.011 |   0.000 | {method 'setAttribute' of 'PySide.QtGui.QWidget' objects} |
+|     6570 |   0.052 |   0.000 |   0.227 |   0.000 | creature.py:280(turnSelf)                                 |
+|     4941 |   0.016 |   0.000 |   0.016 |   0.000 | world.py:247(__init__)                                    |
+|     4941 |   0.003 |   0.000 |   0.003 |   0.000 | world.py:173(getTerrainID)                                |
+|     4941 |   0.222 |   0.000 |   0.713 |   0.000 | world.py:252(__init__)                                    |
+|     4941 |   0.003 |   0.000 |   0.004 |   0.000 | world.py:65(addTile)                                      |
+|     4128 |   0.015 |   0.000 |   0.048 |   0.000 | world.py:68(addCreature)                                  |
+|     4080 |   0.002 |   0.000 |   0.002 |   0.000 | world.py:150(removeCreature)                              |
+|     4080 |   0.003 |   0.000 |   0.003 |   0.000 | creature.py:243(fitness)                                  |
+|     3958 |   0.011 |   0.000 |   0.011 |   0.000 | creature.py:43(__init__)                                  |
+|     3910 |   0.020 |   0.000 |   0.474 |   0.000 | neuronnet.py:17(__init__)                                 |
+|     3910 |   0.012 |   0.000 |   0.803 |   0.000 | creature.py:250(combine)                                  |
+|     3910 |   0.052 |   0.000 |   0.660 |   0.000 | neuronnet.py:45(mate)                                     |
+|     2349 |   0.000 |   0.000 |   0.000 |   0.000 | {len}                                                     |
+|     1983 |   0.000 |   0.000 |   0.000 |   0.000 | creature.py:68(changePic)                                 |
+|     1827 |   0.196 |   0.000 |   2.356 |   0.001 | food.py:51(__init__)                                      |
+|     1551 |   3.555 |   0.002 |   3.555 |   0.002 | {method 'setParent' of 'PySide.QtGui.QWidget' objects}    |
+|     1479 |   0.027 |   0.000 |   3.441 |   0.002 | world.py:297(removeFood)                                  |
+|      893 |   0.005 |   0.000 |   0.005 |   0.000 | creature.py:366(totalEaten)                               |
+|      708 |   0.006 |   0.000 |   0.006 |   0.000 | {method 'format' of 'str' objects}                        |
+|      708 |   0.018 |   0.000 |   0.018 |   0.000 | {method 'setText' of 'PySide.QtGui.QLabel' objects}       |
+|      546 |   0.000 |   0.000 |   0.000 |   0.000 | {method 'iteritems' of 'dict' objects}                    |
+|      542 |   0.025 |   0.000 |   0.134 |   0.000 | world.py:282(update)                                      |
+|      172 |   0.000 |   0.000 |   0.000 |   0.000 | creature.py:305(__init__)                                 |
+|      170 |   0.001 |   0.000 |   0.001 |   0.000 | creature.py:375(totalWalked)                              |
+|      170 |   0.012 |   0.000 |   0.853 |   0.005 | creature.py:330(nextGeneration)                           |
+|      170 |   0.000 |   0.000 |   0.000 |   0.000 | {max}                                                     |
+|      170 |   0.003 |   0.000 |   2.404 |   0.014 | world.py:187(removeEverything)                            |
+|      170 |   0.053 |   0.000 |   2.207 |   0.013 | world.py:183(removeFoods)                                 |
+|      170 |   0.158 |   0.001 |   3.813 |   0.022 | world.py:191(populate)                                    |
+|      170 |   0.045 |   0.000 |   0.195 |   0.001 | world.py:179(removeCreatures)                             |
+|      170 |   0.000 |   0.000 |   0.000 |   0.000 | {method 'index' of 'list' objects}                        |
+
