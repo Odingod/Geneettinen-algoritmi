@@ -46,6 +46,20 @@ class TestIO(unittest.TestCase):
 	def tearDown(self):
 		pass
 
+class TestWorld(unittest.TestCase):
+	#Created by Oskari Nousiainen, aka. Xywzel
+	def setUp(self):
+		self.world = World(False, True)
+		self.generator = NoiseMapGenerator(3, globals.WIDTH+1, globals.HEIGHT+1, 6.0, 1111111)
+		self.world.makeTerrain(self.generator)
+		
+	def test_world(self):
+		self.world.populate()
+		self.assertIsNotNone(self.world.creatures, "There should now bee creatures") 
+		
+	def tearDown(self):
+		pass
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCreature)
     unittest.TextTestRunner(verbosity=2).run(suite)
