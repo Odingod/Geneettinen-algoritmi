@@ -13,7 +13,7 @@ class TestCreature(unittest.TestCase):
 		self.world=World(True)
 		self.world.makeTerrain(NoiseMapGenerator())
 		self.world.populate()
-	
+
 	def test_alive(self):
 		self.assertFalse(self.world.creatures[self.world.creatures.keys()[0]].isDead())
 	def test_destruction(self):
@@ -26,7 +26,7 @@ class TestCreature(unittest.TestCase):
 		cre2=self.world.creatures[self.world.creatures.keys()[1]]
 		newCre=cre1.combine(cre2)
 		self.assertEqual(len(cre1.genome),len(newCre.genome))
-		
+
 	def tearDown(self):
 		pass
 
@@ -35,7 +35,7 @@ class TestIO(unittest.TestCase):
 
 	def setUp(self):
 		pass
-    
+
 	def test_terrain(self):
 		terrain = NoiseMapGenerator()
 		terrain.generate()
@@ -52,16 +52,39 @@ class TestWorld(unittest.TestCase):
 		self.world = World(False, True)
 		self.generator = NoiseMapGenerator(3, globals.WIDTH+1, globals.HEIGHT+1, 6.0, 1111111)
 		self.world.makeTerrain(self.generator)
-		
+
 	def test_world(self):
 		self.world.populate()
-		self.assertIsNotNone(self.world.creatures, "There should now bee creatures") 
-		
+		self.assertIsNotNone(self.world.creatures, "There should now bee creatures")
+
 	def tearDown(self):
 		pass
+
+class TestMakeTerrain(unittest.TestCase):
+	# Oskari Hiltunen
+	def test_makeTerrain(self):
+		""" Tests that World#makeTerrain sets the worlds terrain property and
+		populates its tiles list properly. """
+		world = World(False, False)
+
+		class TestTerrainGenerator(object):
+			def generate(self):
+				self.terrain = [[1, 2, 3], [4, 5, 6]]
+
+		gen = TestTerrainGenerator()
+		world.makeTerrain(gen)
+
+		self.assertEqual(world.terrain, gen.terrain)
+		self.assertEqual(len(world.tiles), len(gen.terrain) * 3)
+
+		for tile in world.tiles:
+			key = getAssociatedKey(ID=gen.terrain[tile.loc[0]][tile.loc[1]])
+			self.assertEqual(tile.key, key)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCreature)
     unittest.TextTestRunner(verbosity=2).run(suite)
     suite = unittest.TestLoader().loadTestsFromTestCase(TestIO)
     unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner(verbosity=2).run(
+        unittest.TestLoader().loadTestsFromTestCase(TestMakeTerrain))
